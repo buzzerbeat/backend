@@ -33,6 +33,7 @@
                     ['label' => '基础', 'options' => ['class' => 'header']],
                     ['label' => '用户管理', 'icon' => 'fa fa-user', 'url' => '/admin-user'],
                     ['label' => '图片管理', 'icon' => 'fa fa-picture-o', 'url' => '/image-admin'],
+                    ['label' => '图片管理[新]', 'icon' => 'fa fa-picture-o', 'url' => '/image-admin/list'],
                     ['label' => '视频管理', 'icon' => 'fa fa-video-camera', 'url' => '/video-admin'],
                     ['label' => '任务管理', 'icon' => 'fa fa-tasks', 'url' => '/crawl-task-admin'],
 //                    ['label' => '轻松一刻', 'options' => ['class' => 'header']],

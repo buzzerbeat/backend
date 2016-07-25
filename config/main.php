@@ -35,6 +35,16 @@ return [
                 'dmstr\web\AdminLteAsset' => [
                     'skin' => 'skin-green',
                 ],
+                'yii\web\JqueryAsset'=>[
+                    'jsOptions'=>[
+                        'position'=>\yii\web\View::POS_HEAD,
+                    ],
+                ],
+                'yii\assets'=>[
+                    'jsOptions'=>[
+                        'position'=>\yii\web\View::POS_HEAD,
+                    ]
+                ]
             ],
         ],
 
@@ -42,6 +52,10 @@ return [
             'renderers' => [
                 'tpl' => [
                     'class' => 'yii\smarty\ViewRenderer',
+                    'options' => [
+                        'left_delimiter' => '{{',
+                        'right_delimiter' => '}}',
+                    ],
                 ],
             ],
         ],
@@ -50,6 +64,7 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'imageAdmin'],
             ],
         ],
     ],
