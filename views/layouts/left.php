@@ -32,8 +32,8 @@
                 'items' => [
                     ['label' => '基础', 'options' => ['class' => 'header']],
                     ['label' => '用户管理', 'icon' => 'fa fa-user', 'url' => '/admin-user'],
-                    ['label' => '图片管理', 'icon' => 'fa fa-picture-o', 'url' => '/image-admin'],
-                    ['label' => '图片管理[新]', 'icon' => 'fa fa-picture-o', 'url' => '/image-admin/list'],
+                    //['label' => '图片管理', 'icon' => 'fa fa-picture-o', 'url' => '/image-admin'],
+                    ['label' => '图片管理', 'icon' => 'fa fa-picture-o', 'url' => '/image-admin/list'],
                     ['label' => '视频管理', 'icon' => 'fa fa-video-camera', 'url' => '/video-admin'],
                     ['label' => '任务管理', 'icon' => 'fa fa-tasks', 'url' => '/crawl-task-admin'],
 //                    ['label' => '轻松一刻', 'options' => ['class' => 'header']],
@@ -44,8 +44,11 @@
                     ['label' => '分类管理', 'icon' => 'fa fa-list', 'url' => '/wallpaper/album-admin'],
 
                     ['label' => '小视频', 'options' => ['class' => 'header']],
-                    ['label' => '视频管理', 'icon' => 'fa fa-video-camera', 'url' => '/microvideo/mv-video-admin'],
-                    ['label' => 'Tag管理', 'icon' => 'fa fa-list', 'url' => '/microvideo/mv-keyword-admin'],
+                    //['label' => '视频管理', 'icon' => 'fa fa-video-camera', 'url' => '/microvideo/mv-video-admin'],
+                    ['label' => '视频管理', 'icon' => 'fa fa-video-camera', 'url' => '/microvideo/mv-video-admin/list'],
+                    //['label' => 'Tag管理', 'icon' => 'fa fa-list', 'url' => '/microvideo/mv-keyword-admin'],
+                    ['label' => 'Tag管理', 'icon' => 'fa fa-tag', 'url' => '/microvideo/mv-video-admin/tag'],
+                    ['label' => '关键词', 'icon' => 'fa fa-key', 'url' => '/microvideo/mv-video-admin/keyword'],
 
                     ['label' => 'Login', 'url' => ['site/login'], 'visible' => Yii::$app->user->isGuest],
                     ['label' => '工具', 'options' => ['class' => 'header']],

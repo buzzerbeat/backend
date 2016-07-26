@@ -64,7 +64,8 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                ['class' => 'yii\rest\UrlRule', 'controller' => 'imageAdmin'],
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'image-admin'],
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'mv-video-admin'],
             ],
         ],
     ],

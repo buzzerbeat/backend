@@ -6,6 +6,8 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use microvideo\models\MvVideo;
+use backend\models\microvideo\MvTag;
+use backend\models\microvideo\MvVideoTagRel;
 
 /**
  * MvVideoSearch represents the model behind the search form about `microvideo\models\MvVideo`.
@@ -73,4 +75,37 @@ class MvVideoSearch extends MvVideo
 
         return $dataProvider;
     }
+    
+    public function fields()
+    {
+        $fields = [
+            'id',
+            'sid',
+            'title',
+            'desc',
+            'elapsedTime',
+            'video',
+            'keywords',
+            'categories',
+            'createTime',
+            'tags',
+            'status',
+            'key'
+        ];
+        return $fields;
+    }
+    
+    public function getCreateTime(){
+    	return date('Y-m-d H:i:s', $this->create_time);
+    }
+    
+    public function getTags(){
+        return $this->hasMany(MvTag::className(), ['id' => 'mv_tag_id'])
+        ->via('tagRels');
+    }
+    
+    public function getTagRels() {
+        return $this->hasMany(MvVideoTagRel::className(), ['mv_video_id'=>'id']);
+    }
+
 }

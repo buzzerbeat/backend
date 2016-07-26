@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use microvideo\models\MvKeyword;
+use backend\models\microvideo\MvTag;
 
 /**
  * MvKeywordSearch represents the model behind the search form about `microvideo\models\MvKeyword`.
@@ -18,8 +19,9 @@ class MvKeywordSearch extends MvKeyword
     public function rules()
     {
         return [
-            [['id', 'rank'], 'integer'],
+            [['id', 'rank', 'is_filter', 'tag_id'], 'integer'],
             [['name'], 'safe'],
+            [['name'], 'unique'],
         ];
     }
 
@@ -66,5 +68,21 @@ class MvKeywordSearch extends MvKeyword
         $query->andFilterWhere(['like', 'name', $this->name]);
 
         return $dataProvider;
+    }
+    
+    public function fields()
+    {
+        $fields = parent::fields();
+        $fields[] = 'id';
+        $fields[] = 'rank';
+        $fields[] = 'tag';
+        $fields[] = 'is_filter';
+
+        return $fields;
+    }
+    
+    public function getTag(){
+    	$tag = MvTag::findOne($this->tag_id);
+    	return !empty($tag) ? $tag : null;
     }
 }

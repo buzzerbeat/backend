@@ -52,15 +52,15 @@ function getOptions() {
 
 function pageselectCallback(page_index, jq){
     $("#table").html('<div class="alert alert-info" role="alert">加载中...</div>');
-    var curPage = parseInt(page_index); 
+    var curPage = 1+parseInt(page_index); 
     $.getJSON(url+'?id='+imgid+'&sid='+imgsid+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage, function(data){
         var lines = '';
         if(page_index == 0){
             var optInit = getOptions();
-            var length = data.total;
+            var length = data._meta.totalCount;
             $("#Pagination").pagination(length, optInit);
         }
-        $.each(data.list,function(i,v){
+        $.each(data.items,function(i,v){
             lines += buildLine(v);
         });
         var th = buildTh();
@@ -76,12 +76,10 @@ function buildLine(v){
 	r += '<td>';
 	r += 'PATH:'+v.file_path;
 	r += '<br/>增加时间：'+v.addTime+'&nbsp;&nbsp;更新时间：'+v.updateTime;
+	r += '<br/>宽：'+v.width+'&nbsp;&nbsp;高：'+v.height;
 	r += '</td>';
 	r += '<td>';
-	r += '宽：'+v.width+'<br/>高：'+v.height;
-	r += '</td>';
-	r += '<td>';
-	r += '<img src="{{$imgUrl}}/thumb/300/120/'+v.sid+'/'+v.md5+v.dotExt+'"/>';
+	r += '<a href="{{$imgUrl}}/thumb/0/0/'+v.sid+'/'+v.md5+v.dotExt+'" target="_blank"><img src="{{$imgUrl}}/thumb/300/200/0/'+v.sid+'/'+v.md5+v.dotExt+'"/></a>';
 	r += '</td>';
 	r += '<td>';
 	r += '<button class="btn btn-block btn-danger del" iid="'+v.id+'">删除</button>';
@@ -94,7 +92,7 @@ function buildLine(v){
 }
 
 function buildTh(){
-    var r = '<tr><th>ID</th><th>信息</th><th>宽高</th><th>预览</th><th>操作</th>';
+    var r = '<tr><th>ID</th><th>信息</th><th>预览</th><th>操作</th>';
     r += '</tr>';
     
     return r;
@@ -165,21 +163,6 @@ $(function(){
     	imgid = 0;
     	imgsid = '';
     	pageselectCallback(0, null);
-    });
-    
-    $(document).on('change', '.status', function(){
-    	var albumId = $(this).attr('aid'), albumStatus = $(this).val();
-    	$.post(
-    		'modify',
-    		{id:albumId, status:albumStatus},
-    		function(data){
-    			if(data.status != 0){
-    				alert(data.message);
-    			}
-    			
-    		},
-    		'json'
-    	)
     });
     
     $(document).on('click', '.del', function(){

@@ -5,58 +5,32 @@ namespace backend\controllers;
 use Yii;
 use common\models\Image;
 use backend\models\ImageSearch;
-use yii\rest\Controller;
+use backend\controllers\BaseController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\Utility;
 use yii\data\ActiveDataProvider;
 use yii\web\Response;
-use backend\models\BackendImg;
 use common\models\ImageForm;
 use yii\web\UploadedFile;
 use yii\data\Pagination;
+use app\models\ImgSearch;
 
 /**
  * ImageAdminController implements the CRUD actions for Image model.
  */
-class ImageAdminController extends Controller
+class ImageAdminController extends BaseController
 {
-    private $formatType = 'html';
     public $uploadImg;
     /**
      * @inheritdoc
      */
     public function behaviors()
     {
-        if($this->action->id != 'data'){
-        	$this->formatType = 'html';
-        }
-        else{
-            $this->formatType = 'json';
-        }
-        $behaviors = parent::behaviors();
-        switch ($this->formatType){
-        	default:
-    	    case 'json' :
-    	    case 'jsonp' :
-    	        $formatType = Response::FORMAT_JSON;
-    	        $behaviors['contentNegotiator']['formats'] = [];
-    	        $behaviors['contentNegotiator']['formats']['application/json'] = $formatType;
-    	        break;
-    	    case 'xml' :
-    	        $formatType = Response::FORMAT_XML;
-    	        $behaviors['contentNegotiator']['formats'] = [];
-    	        $behaviors['contentNegotiator']['formats']['application/xml'] = $formatType;
-    	        break;
-    	    case 'html' :
-    	        $formatType = Response::FORMAT_HTML;
-    	        $behaviors['contentNegotiator']['formats'] = [];
-    	        $behaviors['contentNegotiator']['formats']['html/text'] = $formatType;
-    	        break;
-        }
-        
-        return $behaviors;
+        return parent::behaviors();
     }
+    
+    public $serializer = ['class'=>'yii\rest\Serializer', 'collectionEnvelope'=>'items'];
 
     /**
      * Lists all Image models.
@@ -129,13 +103,13 @@ class ImageAdminController extends Controller
      */
     public function actionDelete()
     {
-        $ar = BackendImg::findOne(\Yii::$app->request->post('id'));
+        $ar = ImageSearch::findOne(\Yii::$app->request->post('id'));
         if(empty($ar)){
-        	$ret = ['status'=>-1, 'message'=>BackendImg::STRING_IMAGE_NOT_EXIST];
+        	$ret = ['status'=>-1, 'message'=>ImageSearch::STRING_IMAGE_NOT_EXIST];
         }
         else{
             $ar->setAttributes(
-                ['status'=>BackendImg::STATUS_INACTIVE, 'update_time'=>time()]
+                ['status'=>ImageSearch::STATUS_INACTIVE, 'update_time'=>time()]
             );
             if($ar->save()){
             	$ret = ['status'=>0, 'message'=>''];
@@ -176,30 +150,7 @@ class ImageAdminController extends Controller
         $imgSid = \Yii::$app->request->get('sid', '');
         $desc = \Yii::$app->request->get('desc', 'desc');
         
-        $model = BackendImg::find()->where(['status'=>Image::STATUS_ACTIVE]);
-        if(!empty($imgId)){
-            $model->andWhere(['id'=>$imgId]);
-        }
-        if(!empty($imgSid)){
-            $model->andWhere(['id'=>Utility::id($imgSid)]);
-        }
-        $pagination = new Pagination([
-            'defaultPageSize' => \Yii::$app->request->get('pre-page', 20),
-            'totalCount' => $model->count(),
-            'page' => \Yii::$app->request->get('page', 0),
-        ]);
-        
-        $data = $model->orderBy("add_time {$desc}")
-            ->offset($pagination->offset)
-            ->limit($pagination->limit)
-            ->all();
-        return [
-            'list' => $data,
-            'total' => $pagination->totalCount,
-        ];
-        
-        /* 
-        $query = BackendImg::find();
+        $query = ImageSearch::find(['status'=>Image::STATUS_ACTIVE]);
         if(!empty($imgId)){
             $query->andWhere(['id'=>$imgId]);
         }
@@ -209,14 +160,9 @@ class ImageAdminController extends Controller
         $total = $query->count();
         $active = new ActiveDataProvider([
             'query' => $query->orderBy("add_time {$desc}"),
-            'pagination' => [
-                'pageSize' => \Yii::$app->request->get('pre-page', 20),
-            ],
-            'totalCount' => $total,
         ]);
-        //$total = $active->getTotalCount();
 
-        return $active; */
+        return $active;
     }
     
     public function actionUpload()
