@@ -56,14 +56,6 @@ class ImageAdminController extends Controller
         }
         
         return $behaviors;
-        /* return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ]; */
     }
 
     /**
@@ -90,9 +82,6 @@ class ImageAdminController extends Controller
     public function actionView($id)
     {
         return Image::findOne($id);
-        /* return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]); */
     }
 
     /**
@@ -157,9 +146,6 @@ class ImageAdminController extends Controller
         }
         
         return \yii\helpers\Json::encode($ret);
-        //$this->findModel($id)->delete();
-
-        //return $this->redirect(['index']);
     }
 
     /**
@@ -179,7 +165,6 @@ class ImageAdminController extends Controller
     }
     
     public function actionList(){
-        //echo date('Y-m-d H:i:s', 1469451413);exit;
         $statusMap = Image::STATUS_MAP;
         $imgUrl = Yii::getAlias('@imgUrl');
         $adminUrl = \Yii::$app->params['adminUrl'];
@@ -234,34 +219,18 @@ class ImageAdminController extends Controller
         return $active; */
     }
     
-    /* public function actionUploadV2(){
-        try{
-            $fileName = \Yii::$app->request->post('fileName', 'file');
-            $file = $_FILES;
-            $this->uploadImg = UploadedFile::getInstanceByName($fileName);
-            $model = new ImageForm();
-            $img = $model->upload($this->uploadImg);
-                
-            if(empty($img)){
-                throw new NotFoundHttpException("上传图片失败");
-            }
-            
-            $ret = array('status'=>0, 'message'=>"成功上传图片");
-        }
-        catch(NotFoundHttpException $e){
-            $ret = array('status'=>-1, 'message'=>$e->getMessage());
-        }
-        
-        return \yii\helpers\Json::encode($ret);
-    } */
-    
     public function actionUpload()
     {
         $model = new ImageForm();
         if (Yii::$app->request->isPost) {
             //print_r($_FILES);exit;
             $model->imageFiles = UploadedFile::getInstances($model, 'imageFiles');
-            $ret = $model->uploadMultiple($model->imageFiles);
+            if($model->uploadMultiple($model->imageFiles)){
+                $ret = ['status'=>0, 'message'=>'上传图片成功'];
+            }
+            else{
+            	$ret = ['status'=>-1, 'message'=>array_shift($model->getErrors())];
+            }
         }
         else{
         	$ret = ['status'=>-1, 'message'=>'非post请求'];
