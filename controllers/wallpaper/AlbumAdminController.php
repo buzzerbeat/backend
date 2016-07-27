@@ -8,25 +8,22 @@ use backend\models\AlbumSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use backend\models\Category;
+use backend\controllers\BaseController;
+use yii\data\ActiveDataProvider;
+use common\components\Utility;
 
 /**
  * AlbumAdminController implements the CRUD actions for Album model.
  */
-class AlbumAdminController extends Controller
+class AlbumAdminController extends BaseController
 {
     /**
      * @inheritdoc
      */
     public function behaviors()
     {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
+        return parent::behaviors();
     }
 
     /**
@@ -35,13 +32,10 @@ class AlbumAdminController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new AlbumSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+        $category = Category::find()->select(['id', 'name'])->asArray()->all();
+        $imgUrl = Yii::getAlias('@imgUrl');
+        $adminUrl = \Yii::$app->params['adminUrl'];
+        return $this->render('album.tpl', ['category'=>$category, 'imgUrl'=>$imgUrl, 'adminUrl'=>$adminUrl]);
     }
 
     /**
@@ -120,5 +114,84 @@ class AlbumAdminController extends Controller
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+    
+    public function actionData(){
+    	$albumId = \Yii::$app->request->get('id', 0);
+        $albumSid = \Yii::$app->request->get('sid', '');
+        $desc = \Yii::$app->request->get('desc', 'desc');
+        $keyword = \Yii::$app->request->get('keyword', '');
+        $category = \Yii::$app->request->get('category', 0);
+        $status = \Yii::$app->request->get('status', AlbumSearch::STATUS_ACTIVE);
+        
+        $query = AlbumSearch::find(['status'=>$status]);
+        if(!empty($albumId)){
+            $query->andWhere(['id'=>$albumId]);
+        }
+        if(!empty($albumSid)){
+        	$query->andWhere(['id'=>Utility::id($albumSid)]);
+        }
+        if(!empty($keyword)){
+            $keyword = trim($keyword);
+        	$query->andWhere(['like', 'title', "%{$keyword}%", false]);
+        }
+        if(!empty($category)){
+            $query->andWhere(['category'=>$category]);
+        }
+        
+        return new ActiveDataProvider([
+            'query' => $query->orderBy("create_time {$desc}"),
+        ]);
+    }
+    
+    public function actionCategoryData(){
+    	$keyword = \Yii::$app->request->get('keyword', '');
+    	$keyword = trim($keyword);
+    	$query = Category::find()->where(['like', 'name', "%{$keyword}%", false]);
+    	
+    	return new ActiveDataProvider([
+            'query' => $query->orderBy('id desc')->limit(10)
+    	]);
+    }
+    
+    public function actionAlbumUpdateIcon(){
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    	$albumId = \Yii::$app->request->post('id');
+    	$icon = \Yii::$app->request->post('icon');
+    	$iconId = Utility::id($icon);
+    	$album = AlbumSearch::findOne($albumId);
+    	if(empty($album)){
+    	    return ['status'=>-1, 'message'=>'分类不存在'];
+    	}
+    	$album->setAttributes(['icon'=>$iconId]);
+    	if(!$album->save()){
+    	    return ['status'=>-1, 'message'=>array_shift($album->getErrors())];
+    	}
+    	return ['status'=>0, 'message'=>''];
+    }
+    
+    public function actionAlbumUpdate(){
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $albumId = \Yii::$app->request->post('id');
+        $album = AlbumSearch::findOne($albumId);
+        if(empty($album)){
+            return ['status'=>-1, 'message'=>'分类不存在'];
+        }
+        $album->setAttributes(\yii::$app->request->post());
+        if(!$album->save()){
+            return ['status'=>-1, 'message'=>array_shift($album->getErrors())];
+        }
+        return ['status'=>0, 'message'=>''];
+    }
+    
+    public function actionCategoryCreate(){
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    	$model = new Category();
+    	$model->setAttributes(\Yii::$app->request->post());
+    	if(!$model->save()){
+    	    return ['status'=>-1, 'message'=>array_shift($model->getErrors())];
+    	}
+    	
+    	return ['status'=>0, 'message'=>'', 'data'=>['category'=>$model]];
     }
 }

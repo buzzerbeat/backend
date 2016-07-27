@@ -63,14 +63,15 @@ class MvTag extends \yii\db\ActiveRecord
     
     public function getTags(){
         //return $this->hasMany(MvTagRel::className(), ['tag_id'=>'id']);
-        $rels = MvTagRel::find()->where(['tag_id'=>$this->id])->all();
+        $rels = MvTagRel::find()->where('tag_id = ' . $this->id . ' or rel_tag_id = ' . $this->id)->all();
         $ret = [];
         foreach($rels as $rel){
-        	$tag = MvTag::findOne($rel->rel_tag_id);
+            $relId = $rel->rel_tag_id == $this->id ? $rel->tag_id : $rel->rel_tag_id;
+        	$tag = MvTag::findOne($relId);
         	if(empty($tag)){
         		continue;
         	}
-        	$ret[] = ['id'=>$rel->id, 'tag'=>['id'=>$tag->id, 'name'=>$tag->name]];
+        	$ret[] = ['id'=>$rel->id, 'tag'=>['id'=>$tag->id, 'name'=>$tag->name, 'type'=>$rel->rel_tag_id == $this->id ? 'top' : 'sub']];
         }
         
         return $ret;

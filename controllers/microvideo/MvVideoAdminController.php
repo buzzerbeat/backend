@@ -414,7 +414,7 @@ class MvVideoAdminController extends BaseController
     public function actionVideoAddTag(){
         $videoId = \yii::$app->request->post('mv_video_id');
         $tagId = \yii::$app->request->post('mv_tag_id');
-        $tagName = \yii::$app->request->post('tag_name');
+        $tagName = \yii::$app->request->post('tag_name', '');
         
         if(!empty($tagId)){
             $relModel = new MvVideoTagRel();

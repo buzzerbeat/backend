@@ -19,6 +19,7 @@ class AppAsset extends AssetBundle
         'js/pagination.js',
         'js/ajaxfileupload.js',
         'js/admin.js',
+        'js/mousewheel.js'
         //'js/plupload.full.min.js'
     ];
     public $depends = [

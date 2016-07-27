@@ -105,18 +105,16 @@ function buildTable(title, lines) {
 
 function fileUpload(){
     var oFiles = $('#ImageForm')[0].files, fileLen = $('#ImageForm')[0].files.length, finishNum = 0, uploadArr = [];
-    for(var i=0; i<fileLen-1; i++){
+    for(var i=0; i<fileLen; i++){
 		var oReader = new FileReader();
 		oReader.onload = function(e){
 		    finishNum++;
 		    uploadArr.push('ImageForm');
-		    if(finishNum == fileLen-1){
+		    if(finishNum == fileLen){
 		    	uploadImage(uploadArr);
 		    }
-		    //console.log(i + 'o')
 		};
 		oReader.readAsDataURL(oFiles[i]);
-		//console.log(i + 'oo')
     }
 }
 

@@ -77,7 +77,7 @@ function buildLine(v){
 	var r = '<tr id="videoItem'+v.id+'">', height = Math.round(v.video.height/v.video.width*320);
 	r += '<td>';
 	r += '<h4 class="inline">'+v.id+'（'+v.sid+'）'+v.title;
-	r += '<select class="form-control status" vid="'+v.id+'">';
+	r += '&nbsp;&nbsp;<select class="form-control status" vid="'+v.id+'">';
 	for(var i in statusMap){
 		r += '<option value="'+i+'" '+(i == v.status ? 'selected="selected"' : '')+'>'+statusMap[i]+'</option>';
 	}
@@ -86,7 +86,7 @@ function buildLine(v){
 	
 	//'<button class="btn btn-default">'+(statusMap[v.status] != undefined ? statusMap[v.status] : '未知状态')+'</button></h4>';
 	r += '<div class="clearfix">';
-	r += '<div class="col-md-7" style="border-right:4px solid #ccc;">';
+	r += '<div class="col-md-7" style="border-right:4px solid #ccc;margin-top:10px;">';
 	r += '<div class="video-media relative" style="width:320px;background:#eaeaea;height:'+height+'px;">'
 	r += '<img class="video-play" src="{{$imgUrl}}/thumb/320/'+height+'/0/'+v.video.coverImg.sid+'/'+v.video.coverImg.md5+v.video.coverImg.dotExt+'" vurl="'+vUrl+'"/>';
 	r += '<p class="video-play glyphicon glyphicon-play-circle play-btn" style="left: 130px;color: #ffffff;font-size: 60px;margin-top: -30px;" vurl="'+vUrl+'"></p>';
@@ -118,10 +118,15 @@ function buildLine(v){
 	r += '<div id="tagInfo'+v.id+'" class="margin-bottom-10">';
 	r += buildTagDiv(v);
 	r += '</div>';
-	r += '<div class="form-inline buildDiv">';
+	r += '<div class="form-inline buildDiv margin-bottom-10">';
 	r += '<input type="text" class="form-control add-rel" oninput="buildBox('+v.id+', this.value);" id="addRelInput'+v.id+'" rid="0">';
 	r += '<button class="btn btn-primary addRel" vid="'+v.id+'">增加</button>';
 	r += '</div>';
+	//relTag
+	r += '<div id="relTagItem'+v.id+'" class="clearfix tag-item rel-tag">';
+	r += buildTagRelDiv(v);
+	r += '</div>';
+	
 	r += '</div>';
 	r += '</td>';
 	
@@ -177,12 +182,36 @@ function buildTagDiv(v){
 	return r;
 }
 
+function buildTagRelDiv(v){
+	var r = '', exist = [];
+	for(var i in v.tags){
+		exist.push(v.tags[i].id);
+	}
+	for(var i in v.tags){
+		for(var j in v.tags[i].tags){
+			var o = v.tags[i].tags[j];
+			if($.inArray(o.tag.id, exist) != -1){
+				continue;
+			}
+			exist.push(o.tag.id);
+			r += '<div class="tag-rel-item btn-group">';
+			r += '<button class="btn btn-default disabled" tid="'+o.tag.id+'">'+o.tag.name+'</button>';
+			r += '<button class="btn btn-default addRelTag" tid="'+o.tag.id+'" vid="'+v.id+'">';
+			r += '<i class="glyphicon glyphicon-plus-sign"></i>';
+			r += '</button></div>';
+		}
+	}
+	
+	return r;
+}
+
 function tagListRefresh(vid){
 	$.getJSON('data?id='+vid, function(v){
-		var r = '';
+		var r = '', m = '';
 		r += buildTagDiv(v.items[0]);
-		
+		m += buildTagRelDiv(v.items[0]);
 		$('#tagInfo'+vid).html(r);
+		$('#relTagItem'+vid).html(m);
 	});
 }
 
@@ -274,6 +303,23 @@ $(function(){
     		},
     		'json'
     	);
+    });
+    
+    $(document).on('click', '.addRelTag', function(){
+    	var vid = $(this).attr('vid'), tid = $(this).attr('tid');
+        $.post(
+            'video-add-tag',
+            {mv_video_id:vid, mv_tag_id:tid},
+            function(data){
+                if(data.status == 0){
+                    tagListRefresh(vid);
+                }
+                else{
+                    alert(data.message);
+                }
+            },
+            'json'
+        );
     });
     
     $(document).on('click', '.delTagRel', function(){

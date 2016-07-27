@@ -1,3 +1,4 @@
+.form-inline .form-hidden{display:none;}
 .relative{position:relative;}
 .margin-bottom-10{margin-bottom:10px;}
 .uploadImage{position:relative;}
@@ -19,6 +20,10 @@
     background: #fff;
     z-index: 100;
 }
+.category .inputRel{
+	left:14px;
+	top:26px;
+}
 .buildDiv .inputRel ul {
     padding: 0;
     margin: 0;
@@ -32,3 +37,10 @@
 .buildDiv .inputRel li:hover, .buildDiv .inputRel .curRel{background:#eaeaea;}
 .inline .form-control{display:inline-block;width:auto;}
 #table .table-bordered td, #table .table-bordered th{border:1px solid #808080;}
+
+.album .icon-div{width: 60px;height: 60px;display: inline-block;}
+.album .btn-upload{width:100%;height:100%;}
+.img-div {overflow-x:scroll;position:relative;height:670px;}
+.img-div .img-ul{position: absolute;}
+.img-item {margin-right:10px;margin-bottom:10px;}
+.img-backend{background:#fff;padding:10px;}

@@ -40,6 +40,7 @@
 //                    ['label' => '资源管理', 'icon' => 'fa fa-circle-o', 'url' => '/admin-resource',],
 //                    ['label' => 'smarty测试', 'icon' => 'fa fa-circle-o', 'url' => '/admin-resource/test?id=5',],
                     ['label' => '壁纸', 'options' => ['class' => 'header']],
+                    ['label' => '图集管理', 'icon' => 'fa fa-picture-o', 'url' => '/wallpaper/album-admin'],
                     ['label' => '图片管理', 'icon' => 'fa fa-picture-o', 'url' => '/wallpaper/image-admin'],
                     ['label' => '分类管理', 'icon' => 'fa fa-list', 'url' => '/wallpaper/album-admin'],
 

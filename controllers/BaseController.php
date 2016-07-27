@@ -7,6 +7,7 @@ use yii\web\Response;
 class BaseController extends \yii\rest\Controller
 {
     public $formatType = 'html';
+    public $serializer = ['class'=>'yii\rest\Serializer', 'collectionEnvelope'=>'items'];
     public function behaviors()
     {
         if(strstr($this->action->id, 'data')){

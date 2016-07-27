@@ -171,11 +171,13 @@ class ImageAdminController extends BaseController
         if (Yii::$app->request->isPost) {
             //print_r($_FILES);exit;
             $model->imageFiles = UploadedFile::getInstances($model, 'imageFiles');
-            if($model->uploadMultiple($model->imageFiles)){
-                $ret = ['status'=>0, 'message'=>'上传图片成功'];
+            $uploadImg = $model->uploadMultiple($model->imageFiles);
+            if(!$uploadImg){
+                $ret = ['status'=>-1, 'message'=>array_shift($model->getErrors())];
             }
             else{
-            	$ret = ['status'=>-1, 'message'=>array_shift($model->getErrors())];
+            	
+            	$ret = ['status'=>0, 'message'=>'上传图片成功', 'data'=>['imgs'=>$uploadImg]];
             }
         }
         else{

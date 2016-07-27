@@ -9,25 +9,22 @@ use backend\models\WpImageSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use backend\controllers\BaseController;
+use common\components\Utility;
+use yii\data\ActiveDataProvider;
+use backend\models\AlbumSearch;
 
 /**
  * ImageAdminController implements the CRUD actions for Image model.
  */
-class ImageAdminController extends Controller
+class ImageAdminController extends BaseController
 {
     /**
      * @inheritdoc
      */
     public function behaviors()
     {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
+        return parent::behaviors();
     }
 
     /**
@@ -36,13 +33,16 @@ class ImageAdminController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new WpImageSearch();
+        $imgUrl = Yii::getAlias('@imgUrl');
+        return $this->render('list.tpl', ['imgUrl'=>$imgUrl]);
+        
+        /* $searchModel = new WpImageSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-        ]);
+        ]); */
     }
 
     /**
@@ -121,5 +121,41 @@ class ImageAdminController extends Controller
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+    
+    public function actionData(){
+    	$wpId = \Yii::$app->request->get('wpid', 0);
+    	$wpSid = \Yii::$app->request->get('wpsid', '');
+    	$desc = \Yii::$app->request->get('desc', 'desc');
+    	$albumName = \Yii::$app->request->get('keyword', '');
+    	$imgId = \Yii::$app->request->get('imgid', 0);
+    	$imgSid = \Yii::$app->request->get('imgsid', '');
+    	
+        $query = WpImageSearch::find();
+        
+        if(!empty($wpId)){
+        	$query->andWhere(['id'=>$wpId]);
+        }
+        if(!empty($wpSid)){
+        	$query->andWhere(['id'=>Utility::id($wpSid)]);
+        }
+        if(!empty($imgId)){
+            $query->andWhere(['img_id'=>$imgId]);
+        }
+        if(!empty($imgSid)){
+            $query->andWhere(['img_id'=>Utility::id($imgSid)]);
+        }
+        if(!empty($albumName)){
+            $album = AlbumSearch::find()->select('id')->where(['like', 'title', "%{$albumName}%", false])->all();
+            $ids = [];
+            foreach($album as $al){
+            	$ids[] = $al->id;
+            }
+
+        	$query->joinWith('rel')->where(['album_img_rel.album_id'=>$ids]);
+        }
+        return new ActiveDataProvider([
+            'query'=>$query->orderBy("id {$desc}")
+        ]);
     }
 }

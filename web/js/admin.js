@@ -64,4 +64,32 @@ $(function(){
             }
         }
     });
-})
+    
+    var initLeft = 0, curLeft = 270, canUp = canDown = true;
+    $(document).on('mousewheel', '.scroll', function(event, delta, deltaX, deltaY){
+        var $this = $(this), $list = $this.find('.img-ul'), twidth = $this.width(), lwidth = $list.width(), maxWidth = lwidth-twidth;
+        if (delta > 0 && canUp){
+            curLeft = curLeft < initLeft-100 ? initLeft : curLeft-100;
+            $this.scrollLeft(curLeft);
+            event.preventDefault();
+        }
+        else if (delta < 0 && canDown){
+            curLeft = curLeft > maxWidth-100 ? maxWidth : curLeft+100;
+            $this.scrollLeft(curLeft);
+            event.preventDefault();
+        }
+        if( curLeft == maxWidth){
+            canDown = false;
+        }
+        else if(curLeft <= 0){
+            canUp = false;
+        }
+        
+    });
+    
+    $(document).on('mouseover', '.scroll', function(){
+        curLeft = $(this).scrollLeft();
+        canUp = canDown = true;
+        $(document).bind('mousewheel');
+    });
+});
