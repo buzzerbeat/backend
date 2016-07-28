@@ -7,11 +7,12 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Image;
+use backend\models\AlbumSearch;
 
 /**
  * ImageSearch represents the model behind the search form about `common\models\Image`.
  */
-class WpImageSearch extends Image
+class WpImageSearch extends WpImage
 {
 
     public $album;
@@ -57,11 +58,6 @@ class WpImageSearch extends Image
             'query' => $query,
         ]);
 
-
-
-
-
-
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
@@ -79,5 +75,29 @@ class WpImageSearch extends Image
             $query->andFilterWhere(['`album_img_rel`.`album_id`'=>$this->album]);
         }
         return $dataProvider;
+    }
+    
+    public function fields()
+    {
+        $fields = parent::fields();
+        $fields['id'] = 'id';
+        $fields['album'] = 'belong';
+           
+        return $fields;
+    }
+    
+    public function getImage() {
+        return $this->hasOne(ImageSearch::className(), ['id' => 'img_id']);
+    }
+    
+    //@todo 用yii的relation返回为null查看
+    public function getBelong() {
+        $rel = AlbumImgRelSearch::find()->where(['wp_img_id'=>$this->id])->one();
+        if(empty($rel)){
+        	return null;
+        }
+        $album = AlbumSearch::find()->select('title')->where(['id'=>$rel->album_id])->one();
+        
+        return $album;
     }
 }

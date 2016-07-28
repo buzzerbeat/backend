@@ -12,6 +12,7 @@ use common\models\Image;
  */
 class ImageSearch extends Image
 {
+    const STRING_IMAGE_NOT_EXIST = '图片不存在';
     /**
      * @inheritdoc
      */
@@ -76,5 +77,25 @@ class ImageSearch extends Image
             ->andFilterWhere(['status'=>1]);
 
         return $dataProvider;
+    }
+    
+    public function fields()
+    {
+        $fields = parent::fields();
+        $fields[] = 'sid';
+        $fields[] = 'dotExt';
+        $fields[] = 'id';
+        $fields[] = 'file_path';
+        $fields[] = 'addTime';
+        $fields[] = 'updateTime';
+        return $fields;
+    }
+    
+    public function getAddTime(){
+        return date('Y-m-d H:i:s', $this->add_time);
+    }
+    
+    public function getUpdateTime(){
+        return date('Y-m-d H:i:s', $this->update_time);
     }
 }

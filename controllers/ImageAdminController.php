@@ -5,29 +5,32 @@ namespace backend\controllers;
 use Yii;
 use common\models\Image;
 use backend\models\ImageSearch;
-use yii\web\Controller;
+use backend\controllers\BaseController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use common\components\Utility;
+use yii\data\ActiveDataProvider;
+use yii\web\Response;
+use common\models\ImageForm;
+use yii\web\UploadedFile;
+use yii\data\Pagination;
+use app\models\ImgSearch;
 
 /**
  * ImageAdminController implements the CRUD actions for Image model.
  */
-class ImageAdminController extends Controller
+class ImageAdminController extends BaseController
 {
+    public $uploadImg;
     /**
      * @inheritdoc
      */
     public function behaviors()
     {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
+        return parent::behaviors();
     }
+    
+    public $serializer = ['class'=>'yii\rest\Serializer', 'collectionEnvelope'=>'items'];
 
     /**
      * Lists all Image models.
@@ -39,6 +42,7 @@ class ImageAdminController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
+            'uploadImg' => new ImageForm(),
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
@@ -51,9 +55,7 @@ class ImageAdminController extends Controller
      */
     public function actionView($id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        return Image::findOne($id);
     }
 
     /**
@@ -99,11 +101,25 @@ class ImageAdminController extends Controller
      * @param integer $id
      * @return mixed
      */
-    public function actionDelete($id)
+    public function actionDelete()
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        $ar = ImageSearch::findOne(\Yii::$app->request->post('id'));
+        if(empty($ar)){
+        	$ret = ['status'=>-1, 'message'=>ImageSearch::STRING_IMAGE_NOT_EXIST];
+        }
+        else{
+            $ar->setAttributes(
+                ['status'=>ImageSearch::STATUS_INACTIVE, 'update_time'=>time()]
+            );
+            if($ar->save()){
+            	$ret = ['status'=>0, 'message'=>''];
+            }
+            else{
+            	$ret = ['status'=>-1, 'message'=>array_shift($ar->getErrors())];
+            }
+        }
+        
+        return \yii\helpers\Json::encode($ret);
     }
 
     /**
@@ -121,4 +137,54 @@ class ImageAdminController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+    
+    public function actionList(){
+        $statusMap = Image::STATUS_MAP;
+        $imgUrl = Yii::getAlias('@imgUrl');
+        $adminUrl = \Yii::$app->params['adminUrl'];
+        return $this->render('list.tpl', ['statusMap'=>$statusMap, 'imgUrl'=>$imgUrl, 'adminUrl'=>$adminUrl]);
+    }
+    
+    public function actionData(){
+        $imgId = \Yii::$app->request->get('id', 0);
+        $imgSid = \Yii::$app->request->get('sid', '');
+        $desc = \Yii::$app->request->get('desc', 'desc');
+        
+        $query = ImageSearch::find(['status'=>Image::STATUS_ACTIVE]);
+        if(!empty($imgId)){
+            $query->andWhere(['id'=>$imgId]);
+        }
+        if(!empty($imgSid)){
+        	$query->andWhere(['id'=>Utility::id($imgSid)]);
+        }
+        $total = $query->count();
+        $active = new ActiveDataProvider([
+            'query' => $query->orderBy("add_time {$desc}"),
+        ]);
+
+        return $active;
+    }
+    
+    public function actionUpload()
+    {
+        $model = new ImageForm();
+        if (Yii::$app->request->isPost) {
+            //print_r($_FILES);exit;
+            $model->imageFiles = UploadedFile::getInstances($model, 'imageFiles');
+            $uploadImg = $model->uploadMultiple($model->imageFiles);
+            if(!$uploadImg){
+                $ret = ['status'=>-1, 'message'=>array_shift($model->getErrors())];
+            }
+            else{
+            	
+            	$ret = ['status'=>0, 'message'=>'上传图片成功', 'data'=>['imgs'=>$uploadImg]];
+            }
+        }
+        else{
+        	$ret = ['status'=>-1, 'message'=>'非post请求'];
+        }
+
+        return \yii\helpers\Json::encode($ret);
+    }
+    
 }

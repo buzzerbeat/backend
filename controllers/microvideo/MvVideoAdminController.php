@@ -5,29 +5,33 @@ namespace backend\controllers\microvideo;
 use Yii;
 use microvideo\models\MvVideo;
 use backend\models\MvVideoSearch;
-use yii\web\Controller;
+use backend\controllers\BaseController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\data\ActiveDataProvider;
+use yii\data\Pagination;
+use backend\models\microvideo\MvVideoTagRel;
+use backend\models\microvideo\MvTag;
+use backend\models\microvideo\MvTagRel;
+use backend\models\MvKeywordSearch;
+use microvideo\models\MvVideoKeywordRel;
+use common\components\Utility;
 
 /**
  * MvVideoAdminController implements the CRUD actions for MvVideo model.
  */
-class MvVideoAdminController extends Controller
+class MvVideoAdminController extends BaseController
 {
     /**
      * @inheritdoc
      */
     public function behaviors()
     {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
+        
+        return parent::behaviors();
     }
+    
+    public $serializer = ['class'=>'yii\rest\Serializer', 'collectionEnvelope'=>'items']; 
 
     /**
      * Lists all MvVideo models.
@@ -120,5 +124,383 @@ class MvVideoAdminController extends Controller
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+    
+    public function actionList(){
+        $statusMap = MvVideo::STATUS_MAP;
+        $imgUrl = Yii::getAlias('@imgUrl');
+        //$adminUrl = \Yii::$app->params['adminUrl']; */
+        
+        return $this->render('list.tpl', ['statusMap'=>$statusMap, 'imgUrl'=>$imgUrl]);//, 'adminUrl'=>$adminUrl
+    }
+    
+    public function actionData(){
+        $videoId = \Yii::$app->request->get('id', 0);
+        $keyword = \Yii::$app->request->get('keyword', '');
+        $desc = \Yii::$app->request->get('desc', 'desc');
+    
+        $query = MvVideoSearch::find();
+        if(!empty($videoId)){
+            $query->andWhere(['id'=>$videoId]);
+        }
+        if(!empty($keyword)){
+            $query->andWhere(['like', 'title', "%{$keyword}%", false]);
+        }
+        return new ActiveDataProvider([
+            'query' => $query->orderBy("id {$desc}"),
+        ]);
+    }
+    
+    public function actionKeyword(){
+        return $this->render('keyword.tpl', []);
+    }
+    
+    public function actionKeywordData(){
+        $id = \Yii::$app->request->get('id', 0);
+        $keyword = \Yii::$app->request->get('keyword', '');
+        $desc = \Yii::$app->request->get('desc', 'desc');
+        $query = MvKeywordSearch::find();
+        if(!empty($keyword)){
+        	$query->andWhere(['like', 'name', "%{$keyword}%", false]);
+        }
+        if(!empty($id)){
+            $query->andWhere(['id'=>$id]);
+        }
+        
+        return new ActiveDataProvider([
+            'query' => $query->orderBy("rank {$desc}, id {$desc}"),
+        ]);
+    }
+    
+    public function actionSaveKeyword(){
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
+    	$tagName = \Yii::$app->request->post('tag', '');
+    	$keywordId = \Yii::$app->request->post('id', 0);
+    	$keywordName = \Yii::$app->request->post('name');
+    	$isFilter = \Yii::$app->request->post('is_filter');
+    	if(!empty($tagName)){
+        	$tagAr = MvTag::find()->where(['name'=>$tagName])->one();
+        	if(empty($tagAr)){
+        	    $tagAr = new MvTag();
+        	    $tagAr->setAttributes(
+                    ['name'=>$tagName]
+        	    );
+        	    if(!$tagAr->save()){
+        	    	return ['status'=>-1, 'message'=>array_shift($tagAr->getErrors())];
+        	    }
+        	    
+        	}
+        	$tagId = $tagAr->id;
+    	}
+    	else{
+    		$tagId = 0;
+    	}
+    	
+    	if(empty($keywordId)){
+    	    $keyword = new MvKeywordSearch();
+    	}
+    	else{
+    		$keyword = MvKeywordSearch::findOne($keywordId);
+    	}
+    	$keyword->setAttributes(
+            [
+    	        'name'=>$keywordName,
+    	        'is_filter'=>$isFilter,
+    	        'tag_id'=>$tagId
+            ]
+    	);
+    	if(!$keyword->save()){
+    	    return ['status'=>-1, 'message'=>array_shift($keyword->getErrors())];
+    	}
+    	else{
+    	    //将该keyword对应的video关联增加到tag
+    	    if(!empty($keywordId) && !empty($tagId)){
+    	        $videoRels = MvVideoKeywordRel::find()->select('video_id')->where(['keyword_id'=>$keywordId])->asArray()->all();
+    	        foreach($videoRels as $videoId){
+                    $tagRel = MvVideoTagRel::find()->where(['mv_video_id'=>$videoId['video_id'], 'mv_tag_id'=>$tagId])->one();
+                    if(empty($tagRel)){
+                        $tagRel = new MvVideoTagRel();
+                        $tagRel->setAttributes(
+                            ['mv_video_id'=>$videoId['album_id'], 'mv_tag_id'=>$tagId]
+                        );
+                        $tagRel->save();
+                    }
+    	        }
+    	    }
+    	    return ['status'=>0 , 'message'=>''];
+    	}
+    }
+    
+    public function actionKeywordFilter(){
+        $keywordId = \Yii::$app->request->post('id');
+        $isFilter = \Yii::$app->request->post('is_filter');
+        $keyword = MvKeywordSearch::findOne($keywordId);
+        $keyword->setAttributes(
+            ['is_filter'=>$isFilter]
+        );
+        if($keyword->save()){
+            $ret = ['status'=>0, 'message'=>''];
+        }
+        else{
+            $ret = ['status'=>-1, 'message'=>array_shift($keyword->getErrors())];
+        }
+        
+        return \yii\helpers\Json::encode($ret);
+    }
+    
+    public function actionTag(){
+    	return $this->render('tag.tpl',[]);
+    }
+    
+    public function actionTagData(){
+        $id = \Yii::$app->request->get('id', 0);
+        $keyword = \Yii::$app->request->get('keyword', '');
+        $desc = \Yii::$app->request->get('desc', 'desc');
+        $query = MvTag::find();
+        if(!empty($keyword)){
+            $query->andWhere(['like', 'name', "%{$keyword}%", false]);
+        }
+        if(!empty($id)){
+            $query->andWhere(['id'=>$id]);
+        }
+        
+        $active = new ActiveDataProvider([
+            'query' => $query->orderBy("id {$desc}"),
+        ]);
+        
+        return $active;
+    }
+    
+    public function actionTagSave(){
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
+        $tagName = \Yii::$app->request->post('name', '');
+        $tagId = \Yii::$app->request->post('id', 0);
+         
+        if(empty($tagId)){
+            $tag = new MvTag();
+        }
+        else{
+            $tag = MvTag::findOne($tagId);
+        }
+        $tag->setAttributes(
+            [
+                'name'=>$tagName,
+            ]
+        );
+        if(!$tag->save()){
+            return ['status'=>-1, 'message'=>array_shift($tag->getErrors())];
+        }
+        else{
+            return ['status'=>0 , 'message'=>''];
+        }
+    }
+    
+    public function actionTagRelationData(){
+    	$keyword = \yii::$app->request->get('keyword', '');
+    	$keyword = trim($keyword);
+    	$tagId = \yii::$app->request->get('tagid', 0);
+    	$relation = MvTag::find()->where(['like', 'name', "%{$keyword}%", false])->andWhere(['<>', 'id', $tagId])->limit(10);
+    	
+    	return new ActiveDataProvider([
+            'query' => $relation->orderBy('id desc')
+    	]);
+    }
+    
+    public function actionTagAddRel(){
+        if(Yii::$app->request->isAjax){
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        }
+        $relId = \yii::$app->request->post('rel_tag_id');
+        $tagId = \yii::$app->request->post('tag_id');
+        $relName = \yii::$app->request->post('rel_name');
+        if(!empty($relId)){
+            $relModel = new MvTagRel();
+            $relModel->setAttributes(Yii::$app->request->post());
+            if($relModel->save()){
+                $ret = ['status'=>0, 'message'=>''];
+        
+            }
+            else{
+                $errors = $relModel->getErrors();
+                return ['status'=>-1, 'message'=>array_shift($errors)];
+            }
+        }
+        else{
+            $name = trim($relName);
+            $tagModel = MvTag::find()->where(['name'=>$name])->one();
+            if(empty($tagModel)){
+                $tagModel = new MvTag();
+                $tagModel->setAttributes(
+                    ['name' => $name]
+                );
+                if(!$tagModel->save()){
+                    $errors = $tagModel->getErrors();
+                    return ['status'=>-1, 'message'=>array_shift($errors)];
+                }
+            }
+            $relModel = new MvTagRel();
+            $relModel->setAttributes([
+                'tag_id'=>$tagId,
+                'rel_tag_id'=>$tagModel->id
+            ]);
+            if(!$relModel->save()){
+                $errors = $relModel->getErrors();
+                return ['status'=>-1, 'message'=>array_shift($errors)];
+            }
+            else{
+                $ret = ['status'=>0, 'message'=>''];
+            }
+        }
+        
+        return $ret;
+    }
+    
+    public function actionTagRemoveRel(){
+        $relId = \yii::$app->request->post('id');
+        $rel = MvTagRel::findOne($relId);
+        if(!$rel->delete()){
+            $errors = $rel->getErrors();
+            return ['status'=>-1, 'message'=>array_shift($errors)];
+        }
+        else{
+            $ret = ['status'=>0, 'message'=>''];
+        }
+        
+        return \yii\helpers\Json::encode($ret);
+    }
+    
+    public function actionTagDelete(){
+    	$tagId = \yii::$app->request->post('id');
+    	$tag = MvTag::findOne($tagId);
+    	//删除关联的标签和视频，关键词
+    	$relVideo = MvVideoTagRel::find()->where(['mv_tag_id'=>$tagId])->all();
+    	foreach($relVideo as $rV){
+    	    $rV->delete();
+    	}
+    	$relKeyword = MvKeywordSearch::find()->where(['tag_id'=>$tagId])->all();
+    	foreach($relKeyword as $rK){
+    	    $rK->delete();
+    	}
+    	$relTag = MvTagRel::find()->where("tag_id = {$tagId} or rel_tag_id = {$tagId}")->all();
+    	foreach($relTag as $rT){
+    		$rT->delete();
+    	}
+    	if(!$tag->delete()){
+    	    $errors = $tag->getErrors();
+    	    return ['status'=>-1, 'message'=>array_shift($errors)];
+    	}
+    	else{
+    	    $ret = ['status'=>0, 'message'=>''];
+    	}
+    	
+    	return \yii\helpers\Json::encode($ret);
+    }
+    
+    public function actionVideoTagData(){
+    	$keyword = \yii::$app->request->get('keyword');
+    	$videoId = \yii::$app->request->get('videoid');
+    	$keyword = trim($keyword);
+    	$sql = "select t.* from mv_tag as t left join mv_video_tag_rel as r on t.id = r.mv_tag_id ";
+    	$sql .= " where t.name like '%{$keyword}%' and (r.mv_video_id is null or r.mv_video_id != {$videoId})";
+    	$tag = MvTag::findBySql($sql);
+    	
+    	return new ActiveDataProvider([
+            'query'=>$tag
+    	]);
+    }
+    
+    public function actionVideoAddTag(){
+        $videoId = \yii::$app->request->post('mv_video_id');
+        $tagId = \yii::$app->request->post('mv_tag_id');
+        $tagName = \yii::$app->request->post('tag_name', '');
+        
+        if(!empty($tagId)){
+            $relModel = new MvVideoTagRel();
+            $relModel->setAttributes(Yii::$app->request->post());
+            if($relModel->save()){
+                $ret = ['status'=>0, 'message'=>''];
+            }
+            else{
+                $errors = $relModel->getErrors();
+                return ['status'=>-1, 'message'=>array_shift($errors)];
+            }
+        }
+        else{
+            $tagName = trim($tagName);
+            $tagModel = MvTag::find()->where(['name'=>$tagName])->one();
+            if(empty($tagModel)){
+                $tagModel = new MvTag();
+                $tagModel->setAttributes(
+                    ['name' => $tagName]
+                );
+                if(!$tagModel->save()){
+                    $errors = $tagModel->getErrors();
+                    return ['status'=>-1, 'message'=>array_shift($errors)];
+                }
+            }
+            $relModel = new MvVideoTagRel();
+            $relModel->setAttributes([
+                'mv_tag_id'=>$tagModel->id,
+                'mv_video_id'=>$videoId
+            ]);
+            if(!$relModel->save()){
+                $errors = $relModel->getErrors();
+                return ['status'=>-1, 'message'=>array_shift($errors)];
+            }
+            else{
+                $ret = ['status'=>0, 'message'=>''];
+            }
+        }
+        
+        return \yii\helpers\Json::encode($ret);
+        
+    }
+    
+    public function actionVideoDelTag(){
+    	$videoId = \Yii::$app->request->post('mv_video_id');
+        $tagId = \Yii::$app->request->post('mv_tag_id');
+        
+        $rel = MvVideoTagRel::find()->where(['mv_video_id'=>$videoId, 'mv_tag_id'=>$tagId])->one();
+        if(!$rel->delete()){
+        	$ret = ['status'=>-1, 'message'=>array_shift($rel->getErrors())];
+        }
+        else{
+        	$ret = ['status'=>0, 'message'=>''];
+        }
+        
+        return \yii\helpers\Json::encode($ret);
+    }
+    
+    public function actionVideoDelKeyword(){
+        $videoId = \Yii::$app->request->post('video_id');
+        $keywordSid = \Yii::$app->request->post('keyword_sid');
+        $keywordId = Utility::id($keywordSid);
+        
+        $rel = MvVideoKeywordRel::find()->where(['video_id'=>$videoId, 'keyword_id'=>$keywordId])->one();
+        if(!$rel->delete()){
+            $ret = ['status'=>-1, 'message'=>array_shift($rel->getErrors())];
+        }
+        else{
+            $ret = ['status'=>0, 'message'=>''];
+        }
+        
+        return \yii\helpers\Json::encode($ret);
+    }
+    
+    public function actionVideoUpdate(){
+    	$id = \Yii::$app->request->post('id');
+    	$model = MvVideoSearch::findOne($id);
+    	
+    	$model->setAttributes(Yii::$app->request->post());
+    	if($model->save()){
+    	    $ret = ['status'=>0, 'message'=>''];
+    	}
+    	else{
+    	    $ret = ['status'=>-1, 'message'=>array_shift($model->getErrors())];
+    	}
+    	
+    	return \yii\helpers\Json::encode($ret);
     }
 }
