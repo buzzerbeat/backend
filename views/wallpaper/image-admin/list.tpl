@@ -31,7 +31,7 @@
 	</div>
 </div>
 <script type="text/javascript">
-var url = 'image-admin/data', pagesize = 10, album = '', 
+var url = 'image-admin/data', pagesize = 100, album = '', 
 	wpImgid=0, wpImgsid='', desc = 'desc', imgid = 0, imgsid = '';
 function getOptions() {
     var opt = {
@@ -74,8 +74,9 @@ function buildLine(v){
 	r += '<p>大小：'+v.image.width+'*'+v.image.height+'</p>';
 	r += '<p>壁纸：'+v.id+'（'+v.sid+'）</p>';
 	r += '<p>图片：'+v.image.id+'（'+v.image.sid+'）</p>';
-	r += '<div style="height:240px;">';
-	r += '<img src="{{$imgUrl}}/thumb/'+(Math.round(v.image.width/v.image.height*240))+'/240/0/'+v.image.sid+'/'+v.image.md5+v.image.dotExt+'"/>'
+	r += '<div style="width:240px;min-height:240px;">';
+	r += '<a href="{{$imgUrl}}/thumb/0/0/0/'+v.image.sid+'/'+v.image.md5+v.image.dotExt+'" target="_blank">';
+	r += '<img src="{{$imgUrl}}/thumb/240/'+(Math.round(v.image.height/v.image.width*240))+'/0/'+v.image.sid+'/'+v.image.md5+v.image.dotExt+'"/></a>';
 	r += '</div>';
 	r += '</div>';
 	

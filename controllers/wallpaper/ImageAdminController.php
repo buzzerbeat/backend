@@ -155,7 +155,10 @@ class ImageAdminController extends BaseController
         	$query->joinWith('rel')->where(['album_img_rel.album_id'=>$ids]);
         }
         return new ActiveDataProvider([
-            'query'=>$query->orderBy("id {$desc}")
+            'query'=>$query->orderBy("id {$desc}"),
+            'pagination'=>[
+                'pageSize'=>\Yii::$app->request->get('pre-page', 20)
+            ]
         ]);
     }
 }
