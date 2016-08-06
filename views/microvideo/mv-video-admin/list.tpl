@@ -87,7 +87,7 @@ function buildLine(v){
 	//'<button class="btn btn-default">'+(statusMap[v.status] != undefined ? statusMap[v.status] : '未知状态')+'</button></h4>';
 	r += '<div class="clearfix">';
 	r += '<div class="col-md-7" style="border-right:4px solid #ccc;margin-top:10px;">';
-	r += '<div class="video-media relative" style="width:320px;background:#eaeaea;height:'+height+'px;">'
+	r += '<div class="video-media relative" style="width:320px;background:#eaeaea;">';//height:'+height+'px;
 	r += '<img class="video-play" src="{{$imgUrl}}/thumb/320/'+height+'/0/'+v.video.coverImg.sid+'/'+v.video.coverImg.md5+v.video.coverImg.dotExt+'" vurl="'+vUrl+'"/>';
 	r += '<p class="video-play glyphicon glyphicon-play-circle play-btn" style="left: 130px;color: #ffffff;font-size: 60px;margin-top: -30px;" vurl="'+vUrl+'"></p>';
 	//r += '<video class="showVideo" autoplay="autoplay" controls="controls" src="'+vUrl+'" width="320">浏览器不支持，请更换浏览器</video>'
@@ -98,18 +98,19 @@ function buildLine(v){
 	r += '<div class="col-md-5">';
 	r += '<p><a href="'+v.video.site_url+'" target="_blank">'+v.key+'</a></p>';
 	r += '<p>视频&nbsp;&nbsp;宽：'+v.video.width+'&nbsp;&nbsp;高：'+v.video.height+'</p>';
-	r += '<p>图片&nbsp;&nbsp;宽：'+v.video.coverImg.width+'&nbsp;&nbsp;高：'+v.video.coverImg.height+'</p>';
+	r += '<p>图片&nbsp;&nbsp;宽：'+v.video.coverImg.width+'&nbsp;&nbsp;高：'+v.video.coverImg.height+'&nbsp;&nbsp;<a href="{{$imgUrl}}/thumb/0/0/0/'+v.video.coverImg.sid+'/'+v.video.coverImg.md5+v.video.coverImg.dotExt+'" vurl="'+vUrl+'" target="_blank">地址</a></p>';
 	r += '<p>增加时间：'+v.createTime+'</p>';
 	r += '<p>keywords</p>';
 	r += '<div class="clearfix ">';
 	for(var i in v.keywords){
 		var o = v.keywords[i];
-		r += '<div class="tag-rel-item btn-group">';
+		/*r += '<div class="tag-rel-item btn-group">';
 		r += '<button class="btn btn-default disabled" kid="'+o.sid+'">'+o.name+'</button>';
 		r += '<button class="btn btn-danger delKeywordRel" kid="'+o.sid+'" vid="'+v.id+'">';
 		r += '<i class="glyphicon glyphicon-trash"></i>';
 		r += '</button>';
-		r += '</div>';
+		r += '</div>';*/
+		r += '&nbsp;&nbsp;<span>'+o.name+'</span>';
 	}
 	r += '</div>';
 	r += '</div>';

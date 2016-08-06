@@ -86,11 +86,13 @@ class MvVideoSearch extends MvVideo
             'elapsedTime',
             'video',
             'keywords',
-            'categories',
             'createTime',
             'tags',
             'status',
-            'key'
+            'key' => function($modal){
+                $video = VideoSearch::findOne($modal->video_id);
+                return $video->key;    
+            }
         ];
         return $fields;
     }
@@ -106,6 +108,10 @@ class MvVideoSearch extends MvVideo
     
     public function getTagRels() {
         return $this->hasMany(MvVideoTagRel::className(), ['mv_video_id'=>'id']);
+    }
+    
+    public function getKey(){
+    	return 'ddd';
     }
 
 }

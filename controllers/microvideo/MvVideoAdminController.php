@@ -129,7 +129,6 @@ class MvVideoAdminController extends BaseController
     public function actionList(){
         $statusMap = MvVideo::STATUS_MAP;
         $imgUrl = Yii::getAlias('@imgUrl');
-        //$adminUrl = \Yii::$app->params['adminUrl']; */
         
         return $this->render('list.tpl', ['statusMap'=>$statusMap, 'imgUrl'=>$imgUrl]);//, 'adminUrl'=>$adminUrl
     }
@@ -266,7 +265,7 @@ class MvVideoAdminController extends BaseController
         }
         
         $active = new ActiveDataProvider([
-            'query' => $query->orderBy("id {$desc}"),
+            'query' => $query->orderBy("count {$desc}"),
         ]);
         
         return $active;

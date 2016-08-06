@@ -88,7 +88,7 @@ function buildLine(v){
 	var r = '<tr>';
 	
 	r += '<td class="col-md-1">';
-	r += v.id;
+	r += v.id+'（'+v.sid+'）';
 	r += '</td>';
 	r += '<td class="col-md-11">';
 	r += '<div id="tagItem'+v.id+'">';
@@ -118,13 +118,19 @@ function buildTable(title, lines) {
 
 function buildMain(v){
 	var r = '';
-	r += '<h4>'+v.name+'&nbsp;<button class="btn btn-danger btn-sm delTag" tid="'+v.id+'"><i class="glyphicon glyphicon-trash"></i></button></h4>';
+	r += '<h4>'+v.name+'&nbsp;&nbsp;（'+v.count+'）&nbsp;';
+	r += '<button class="btn btn-danger btn-sm delTag" tid="'+v.id+'"><i class="glyphicon glyphicon-trash"></i></button>';
+	r += '&nbsp;&nbsp;关键词：';
+	for(var i in v.keywords){
+		r += '&nbsp;&nbsp;'+v.keywords[i].name;
+	}
+	r += '</h4>';
 	var tagLen = v.tags.length;
 	for(var i in v.tags){
 		var o = v.tags[i];
 		r += '<div class="tag-rel-item margin-bottom-10">';
 		r += '<div class="btn-group">';
-		r += '<button class="btn btn-default" rid="'+o.tag.id+'">'+o.tag.name+'</button>';
+		r += '<button class="btn btn-default" rid="'+o.tag.id+'">'+o.tag.name+'（'+o.tag.count+'）</button>';
 		r += '<button class="btn btn-danger del" tid="'+v.id+'" rid="'+o.id+'"><i class="glyphicon glyphicon-trash"></i></button>';
 		r += '</div>';
 		//r += '<div class="btn-toolbar tag-btn">';

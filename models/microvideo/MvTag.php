@@ -4,6 +4,8 @@ namespace backend\models\microvideo;
 
 use Yii;
 use backend\models\MvVideoSearch;
+use common\components\Utility;
+use microvideo\models\MvKeyword;
 
 /**
  * This is the model class for table "mv_tag".
@@ -37,6 +39,7 @@ class MvTag extends \yii\db\ActiveRecord
         return [
             [['name'], 'required'],
             [['name'], 'string', 'max'=>40],
+            [['count'], 'integer']
         ];
     }
 
@@ -48,6 +51,7 @@ class MvTag extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'name' => 'Name',
+            'count' => 'count'
         ];
     }
     
@@ -55,10 +59,17 @@ class MvTag extends \yii\db\ActiveRecord
     {
         $fields = [
             'id',
+            'sid',
             'name',
             'tags',
+            'count',
+            'keywords'
         ];
         return $fields;
+    }
+    
+    public function getSid(){
+    	return Utility::sid($this->id);
     }
     
     public function getTags(){
@@ -71,7 +82,15 @@ class MvTag extends \yii\db\ActiveRecord
         	if(empty($tag)){
         		continue;
         	}
-        	$ret[] = ['id'=>$rel->id, 'tag'=>['id'=>$tag->id, 'name'=>$tag->name, 'type'=>$rel->rel_tag_id == $this->id ? 'top' : 'sub']];
+        	$ret[] = [
+        	   'id'=>$rel->id, 
+        	   'tag'=>[
+        	       'id'=>$tag->id, 
+        	       'name'=>$tag->name, 
+        	       'type'=>$rel->rel_tag_id == $this->id ? 'top' : 'sub',
+        	       'count'=>$tag->count,
+                ]
+            ];
         }
         
         return $ret;
@@ -79,5 +98,9 @@ class MvTag extends \yii\db\ActiveRecord
     
     public function getVideos(){
         return $this->hasMany(MvVideoTagRel::className(), ['mv_tag_id'=>'id']);
+    }
+    
+    public function getKeywords(){
+    	return $this->hasMany(MvKeyword::className(), ['tag_id'=>'id']);
     }
 }
