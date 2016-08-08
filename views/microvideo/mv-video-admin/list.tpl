@@ -257,7 +257,7 @@ function uploadImage(uploadArr, videoId){
 		data:{num:uploadArr.length, fileName:'ImageForm'},
 		success: function (data, status){
 			if(data.status == 0){
-			    uploadAlbumIcon(videoId, data.data.imgs[0]);
+			    uploadVideoCover(videoId, data.data.imgs[0]);
 			}
 			else{
 				alert(data.message);
@@ -269,7 +269,7 @@ function uploadImage(uploadArr, videoId){
 	});
 }
 
-function uploadAlbumIcon(videoId, img){
+function uploadVideoCover(videoId, img){
 	$.post(
 		'{{$adminUrl}}/microvideo/mv-video-admin/update-cover-img',
 		{id:videoId, cover:img.sid},
