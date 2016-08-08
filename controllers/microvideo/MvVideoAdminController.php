@@ -16,6 +16,7 @@ use backend\models\microvideo\MvTagRel;
 use backend\models\MvKeywordSearch;
 use microvideo\models\MvVideoKeywordRel;
 use common\components\Utility;
+use backend\models\VideoSearch;
 
 /**
  * MvVideoAdminController implements the CRUD actions for MvVideo model.
@@ -129,24 +130,32 @@ class MvVideoAdminController extends BaseController
     public function actionList(){
         $statusMap = MvVideo::STATUS_MAP;
         $imgUrl = Yii::getAlias('@imgUrl');
-        
-        return $this->render('list.tpl', ['statusMap'=>$statusMap, 'imgUrl'=>$imgUrl]);//, 'adminUrl'=>$adminUrl
+        $tag = \Yii::$app->request->get('tag', 0);
+        $adminUrl = Yii::$app->params['adminUrl'];
+        return $this->render('list.tpl', ['statusMap'=>$statusMap, 'imgUrl'=>$imgUrl, 'tag'=>$tag, 'adminUrl'=>$adminUrl]);
     }
     
     public function actionData(){
         $videoId = \Yii::$app->request->get('id', 0);
         $keyword = \Yii::$app->request->get('keyword', '');
         $desc = \Yii::$app->request->get('desc', 'desc');
-    
+        $tag = \Yii::$app->request->get('tag', 0);
         $query = MvVideoSearch::find();
         if(!empty($videoId)){
-            $query->andWhere(['id'=>$videoId]);
+            $query->andWhere(['`mv_video`.id'=>$videoId]);
         }
         if(!empty($keyword)){
-            $query->andWhere(['like', 'title', "%{$keyword}%", false]);
+            $query->andWhere(['like', '`mv_video`.title', "%{$keyword}%", false]);
+        }
+        if(!empty($tag)){
+        	$query->leftJoin('`mv_video_tag_rel`', '`mv_video_tag_rel`.mv_video_id = `mv_video`.id')
+        	   ->andWhere(["`mv_video_tag_rel`.mv_tag_id"=>$tag]);
         }
         return new ActiveDataProvider([
             'query' => $query->orderBy("id {$desc}"),
+            'pagination'=>[
+                'pageSize' => \Yii::$app->request->get('per-page', 20),
+            ]
         ]);
     }
     
@@ -502,4 +511,37 @@ class MvVideoAdminController extends BaseController
     	
     	return \yii\helpers\Json::encode($ret);
     }
+    
+    public function actionUpdateCoverImg(){
+        $id = \Yii::$app->request->post('id');
+        $cover = \Yii::$app->request->post('cover');
+        $coverId = Utility::id($cover);
+        try{
+            if(empty($coverId)){
+                throw new \Exception('不存在的封面图');
+            }
+            $mvModel = MvVideoSearch::findOne($id);
+            if(empty($mvModel)){
+                throw new \Exception('不存在的Mv视频');
+            }
+            $vModel = VideoSearch::findOne($mvModel->video_id);
+            if(empty($vModel)){
+            	throw new \Exception('不存在的视频');
+            }
+            $vModel->setAttributes(['cover_img'=>$coverId]);
+            if(!$vModel->save()){
+            	throw new \Exception(array_shift($vModel->getFirstErrors()));
+            }
+            
+            $ret = ['status'=>0, 'message'=>''];
+        }
+        catch(\Exception $e){
+            $ret = ['status'=>-1, 'message'=>$e->getMessage()];
+        }
+        
+        return \yii\helpers\Json::encode($ret);
+    	
+    }
+    
+    
 }

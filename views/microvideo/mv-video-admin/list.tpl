@@ -26,7 +26,7 @@
 	</div>
 </div>
 <script type="text/javascript">
-var url = 'data', pagesize = 10, statusMap = [], videoid=0, keyword='', desc = 'desc';
+var url = 'data', pagesize = 20, statusMap = [], videoid=0, keyword='', desc = 'desc', tag={{$tag}};
 {{foreach from=$statusMap key=sk item=sv}}
 	statusMap[{{$sk}}] = '{{$sv}}';
 {{/foreach}}
@@ -47,7 +47,7 @@ function getOptions() {
 function pageselectCallback(page_index, jq){
     $("#table").html('<div class="alert alert-info" role="alert">加载中...</div>');
     var curPage = 1+parseInt(page_index); 
-    $.getJSON(url+'?id='+videoid+'&keyword='+keyword+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage, function(data){
+    $.getJSON(url+'?id='+videoid+'&keyword='+keyword+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage+'&tag='+tag, function(data){
         var lines = '';
         if(page_index == 0){
             var optInit = getOptions();
@@ -74,9 +74,11 @@ function buildLine(v){
 		}
 	}
 
-	var r = '<tr id="videoItem'+v.id+'">', height = Math.round(v.video.height/v.video.width*320);
+	var r = '<tr id="videoItem'+v.id+'">', 
+		height = v.video.coverImg != null ? Math.round(v.video.coverImg.height/v.video.coverImg.width*320) : (v.video.width != 0 ? Math.round(v.video.height/v.video.width*320) : 0);
 	r += '<td>';
 	r += '<h4 class="inline">'+v.id+'（'+v.sid+'）'+v.title;
+	
 	r += '&nbsp;&nbsp;<select class="form-control status" vid="'+v.id+'">';
 	for(var i in statusMap){
 		r += '<option value="'+i+'" '+(i == v.status ? 'selected="selected"' : '')+'>'+statusMap[i]+'</option>';
@@ -87,18 +89,33 @@ function buildLine(v){
 	//'<button class="btn btn-default">'+(statusMap[v.status] != undefined ? statusMap[v.status] : '未知状态')+'</button></h4>';
 	r += '<div class="clearfix">';
 	r += '<div class="col-md-7" style="border-right:4px solid #ccc;margin-top:10px;">';
-	r += '<div class="video-media relative" style="width:320px;background:#eaeaea;">';//height:'+height+'px;
-	r += '<img class="video-play" src="{{$imgUrl}}/thumb/320/'+height+'/0/'+v.video.coverImg.sid+'/'+v.video.coverImg.md5+v.video.coverImg.dotExt+'" vurl="'+vUrl+'"/>';
+	r += '<div class="video-media relative pull-left" id="videoMedia'+v.id+'" style="width:320px;background:#eaeaea;">';//height:'+height+'px;
+	if(v.video.coverImg != null){
+		r += '<img class="video-play" src="{{$imgUrl}}/thumb/320/'+height+'/0/'+v.video.coverImg.sid+'/'+v.video.coverImg.md5+v.video.coverImg.dotExt+'" vurl="'+vUrl+'"/>';
+	}
+	else{
+		r += '<div class="video-play default-cover" vurl="'+vUrl+'"></div>';
+	}
 	r += '<p class="video-play glyphicon glyphicon-play-circle play-btn" style="left: 130px;color: #ffffff;font-size: 60px;margin-top: -30px;" vurl="'+vUrl+'"></p>';
 	//r += '<video class="showVideo" autoplay="autoplay" controls="controls" src="'+vUrl+'" width="320">浏览器不支持，请更换浏览器</video>'
-	r += '</div>'
+	r += '</div>';
+	
+	//更新封面图
+	r += '&nbsp;&nbsp;<span class="icon-div uploadImage" id="uploadImage'+v.id+'">';
+	r += '<button class="btn btn-default btn-upload"><i class="glyphicon glyphicon-upload"></i></button>';
+	r += '<input type="file" id="ImageForm'+v.id+'" name="ImageForm[imageFiles][]" onchange="fileUpload('+v.id+');" accept="image/jpeg,image/png,image/gif"/>';
+	r += '</span>';
+	r += '<div class="clearfix"></div>';
+	
 	r += '<p>'+v.desc+'</p>';
 	r += '</div>';
 	
 	r += '<div class="col-md-5">';
 	r += '<p><a href="'+v.video.site_url+'" target="_blank">'+v.key+'</a></p>';
 	r += '<p>视频&nbsp;&nbsp;宽：'+v.video.width+'&nbsp;&nbsp;高：'+v.video.height+'</p>';
-	r += '<p>图片&nbsp;&nbsp;宽：'+v.video.coverImg.width+'&nbsp;&nbsp;高：'+v.video.coverImg.height+'&nbsp;&nbsp;<a href="{{$imgUrl}}/thumb/0/0/0/'+v.video.coverImg.sid+'/'+v.video.coverImg.md5+v.video.coverImg.dotExt+'" vurl="'+vUrl+'" target="_blank">地址</a></p>';
+	if(v.video.coverImg != null){
+		r += '<p>图片&nbsp;&nbsp;宽：'+v.video.coverImg.width+'&nbsp;&nbsp;高：'+v.video.coverImg.height+'&nbsp;&nbsp;<a href="{{$imgUrl}}/thumb/0/0/0/'+v.video.coverImg.sid+'/'+v.video.coverImg.md5+v.video.coverImg.dotExt+'" vurl="'+vUrl+'" target="_blank">地址</a></p>';
+	}
 	r += '<p>增加时间：'+v.createTime+'</p>';
 	r += '<p>keywords</p>';
 	r += '<div class="clearfix ">';
@@ -214,6 +231,65 @@ function tagListRefresh(vid){
 		$('#tagInfo'+vid).html(r);
 		$('#relTagItem'+vid).html(m);
 	});
+}
+
+function fileUpload(videoId){
+    var oFiles = $('#ImageForm'+videoId)[0].files, fileLen = $('#ImageForm'+videoId)[0].files.length, finishNum = 0, uploadArr = [];
+    for(var i=0; i<fileLen; i++){
+		var oReader = new FileReader();
+		oReader.onload = function(e){
+		    finishNum++;
+		    uploadArr.push('ImageForm'+videoId);
+		    if(finishNum == fileLen){
+		    	uploadImage(uploadArr, videoId);
+		    }
+		};
+		oReader.readAsDataURL(oFiles[i]);
+    }
+}
+
+function uploadImage(uploadArr, videoId){
+    $.ajaxFileUpload({
+		url:'{{$adminUrl}}/image-admin/upload',
+		secureuri:false,
+		fileElementId:uploadArr,
+		dataType: 'json',
+		data:{num:uploadArr.length, fileName:'ImageForm'},
+		success: function (data, status){
+			if(data.status == 0){
+			    uploadVideoCover(videoId, data.data.imgs[0]);
+			}
+			else{
+				alert(data.message);
+			}
+		},
+		error:function(data,status,e){
+			alert('请重新尝试');
+		}
+	});
+}
+
+function uploadVideoCover(videoId, img){
+	$.post(
+		'{{$adminUrl}}/microvideo/mv-video-admin/update-cover-img',
+		{id:videoId, cover:img.sid},
+		function(data){
+			if(data.status != 0){
+				alert('图片上传成功，但是保存到分类失败：'+data.message);
+			}
+			else{
+				alert('成功');
+				//写img
+				$vDiv = $('#videoMedia'+videoId);
+				var imgH = $vDiv.height(), vurl = ($vDiv.find('.video-play').length>0)?$vDiv.find('.video-play').attr('vurl'):$vDiv.find('.showVideo').attr('src');
+				$vDiv.find('.video-play').remove();
+				$vDiv.find('.showVideo').remove();
+			    $vDiv.prepend('<img class="video-play" src="{{$imgUrl}}/thumb/320/'+imgH+'/0/'+img.sid+'/'+img.md5+img.dotExt+'" vurl="'+vurl+'"/>');
+			}
+		},
+		'json'
+	)
+	
 }
 
 $(function(){

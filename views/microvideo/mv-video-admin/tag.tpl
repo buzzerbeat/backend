@@ -118,7 +118,7 @@ function buildTable(title, lines) {
 
 function buildMain(v){
 	var r = '';
-	r += '<h4>'+v.name+'&nbsp;&nbsp;（'+v.count+'）&nbsp;';
+	r += '<h4><a href="./list?tag='+v.id+'" target="_blank">'+v.name+'</a>&nbsp;&nbsp;（'+v.count+'）&nbsp;';
 	r += '<button class="btn btn-danger btn-sm delTag" tid="'+v.id+'"><i class="glyphicon glyphicon-trash"></i></button>';
 	r += '&nbsp;&nbsp;关键词：';
 	for(var i in v.keywords){
