@@ -3,11 +3,18 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div class="form-inline margin-bottom-10">
+				<input type="text" id="selectedDate" class="form-control auto-kal" data-kal="months: 2, mode:'range', format:'YYYY-MM-DD', rangeDelimiter:'~', direction:'today-past'" placeholder="指定日期筛选"/>
+				<div class="btn-group" id="order">
+					<button class="btn btn-info active" order="id">按id</button>
+					<button class="btn btn-default" order="create_time">按源发布时间</button>
+					<button class="btn btn-default" order="played">按播放次数</button>
+					<button class="btn btn-default" order="like">按点赞数</button>
+				</div>
 				<div class="btn-group" id="desc">
 					<button class="btn btn-info active" desc="desc">倒序</button>
 					<button class="btn btn-default" desc="asc">正序</button>
 				</div>
-				<input class="form-control" type="number" id="videoid" placeholder="视频id查询"/>
+				<input class="form-control" type="number" id="videoid" placeholder="视频id查询" {{if !empty($vid)}}value="{{$vid}}"{{/if}}/>
 				<input class="form-control" type="text" id="keyword" placeholder="名称查询"/>
 				<button class="btn btn-primary" id="filterBtn">搜索</button>
 				<button class="btn btn-default" id="resetBtn">重置</button>
@@ -26,7 +33,7 @@
 	</div>
 </div>
 <script type="text/javascript">
-var url = 'data', pagesize = 20, statusMap = [], videoid=0, keyword='', desc = 'desc', tag={{$tag}};
+var url = 'data', pagesize = 20, statusMap = [], videoid={{$vid}}, keyword='', desc = 'desc', tag={{$tag}}, order = 'id', date = '';
 {{foreach from=$statusMap key=sk item=sv}}
 	statusMap[{{$sk}}] = '{{$sv}}';
 {{/foreach}}
@@ -47,7 +54,7 @@ function getOptions() {
 function pageselectCallback(page_index, jq){
     $("#table").html('<div class="alert alert-info" role="alert">加载中...</div>');
     var curPage = 1+parseInt(page_index); 
-    $.getJSON(url+'?id='+videoid+'&keyword='+keyword+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage+'&tag='+tag, function(data){
+    $.getJSON(url+'?id='+videoid+'&keyword='+keyword+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage+'&tag='+tag+'&order='+order+'&date='+date, function(data){
         var lines = '';
         if(page_index == 0){
             var optInit = getOptions();
@@ -84,6 +91,10 @@ function buildLine(v){
 		r += '<option value="'+i+'" '+(i == v.status ? 'selected="selected"' : '')+'>'+statusMap[i]+'</option>';
 	}
 	r += '</select>';
+	for(var i=0; i<3; i++){
+		r += '&nbsp;&nbsp;<label><input type="radio" class="review" vid="'+v.id+'" name="albumReview'+v.id+'" review="'+i+'" '+(v.review == i ? 'checked=""' : '')+'> review-'+i+'</label>';
+	}
+	
 	r += '</h4>';
 	
 	//'<button class="btn btn-default">'+(statusMap[v.status] != undefined ? statusMap[v.status] : '未知状态')+'</button></h4>';
@@ -116,7 +127,9 @@ function buildLine(v){
 	if(v.video.coverImg != null){
 		r += '<p>图片&nbsp;&nbsp;宽：'+v.video.coverImg.width+'&nbsp;&nbsp;高：'+v.video.coverImg.height+'&nbsp;&nbsp;<a href="{{$imgUrl}}/thumb/0/0/0/'+v.video.coverImg.sid+'/'+v.video.coverImg.md5+v.video.coverImg.dotExt+'" vurl="'+vUrl+'" target="_blank">地址</a></p>';
 	}
-	r += '<p>增加时间：'+v.createTime+'</p>';
+	r += '<p>源发布时间：'+v.createTime+'</p>';
+	r += '<p>采集时间：'+v.updateTime+'</p>';
+	r += '<p>赞（'+v.countNum.like+'）&nbsp;踩（'+v.countNum.bury+'）&nbsp;播放次数（'+v.countNum.played+'）</p>';
 	r += '<p>keywords</p>';
 	r += '<div class="clearfix ">';
 	for(var i in v.keywords){
@@ -130,6 +143,11 @@ function buildLine(v){
 		r += '&nbsp;&nbsp;<span>'+o.name+'</span>';
 	}
 	r += '</div>';
+	if(v.commentNum > 0){
+		r += '<div class="clearfix">';
+		r += '<a href="../mv-comment-admin/list?vid='+v.id+'" target="_blank">查看评论（'+v.commentNum+'）</a>';
+		r += '</div>';
+	}
 	r += '</div>';
 	r += '</div>'
 	r += '<div>';
@@ -297,9 +315,16 @@ $(function(){
 	pageselectCallback(0, null);
 	
 	$(document).on('click', '#desc .btn', function(){
-		$('#desc .btn').removeClass('acitve btn-info').addClass('btn-default');
+		$('#desc .btn').removeClass('active btn-info').addClass('btn-default');
 		$(this).removeClass('btn-default').addClass('active btn-info');
 		desc = $(this).attr('desc');
+		pageselectCallback(0, null);
+	});
+	
+	$(document).on('click', '#order .btn', function(){
+		$('#order .btn').removeClass('active btn-info').addClass('btn-default');
+		$(this).removeClass('btn-default').addClass('active btn-info');
+		order = $(this).attr('order');
 		pageselectCallback(0, null);
 	});
     
@@ -312,8 +337,10 @@ $(function(){
     $('#resetBtn').click(function(){
     	$('#videoid').val('');
     	$('#keyword').val('');
+    	$('#selectedDate').val('');
     	videoid = 0;
     	keyword = '';
+    	date = '';
     	pageselectCallback(0, null);
     });
     
@@ -418,6 +445,27 @@ $(function(){
     		'json'
     	);
     });
+    
+    $('#selectedDate').change(function(){
+		date = $(this).val();
+		if(date.indexOf('~') != -1){
+			pageselectCallback(0,null);
+			$('.kalendae').hide();
+			$('#selectedDate').blur();
+		}
+	});
+	
+	$(document).on('click', '.review', function(){
+		var curVid = $(this).attr('vid'), review = $(this).attr('review');
+		$.post(
+			'video-update',
+			{id:curVid, review:review},
+			function(data){
+				alert(data.message);
+			},
+			'json'
+		)
+	});
 	
 })
 
