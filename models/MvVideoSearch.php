@@ -6,8 +6,10 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use microvideo\models\MvVideo;
+use microvideo\models\MvVideoCount;
 use backend\models\microvideo\MvTag;
 use backend\models\microvideo\MvVideoTagRel;
+use backend\models\microvideo\MvCommentSearch;
 
 /**
  * MvVideoSearch represents the model behind the search form about `microvideo\models\MvVideo`.
@@ -20,7 +22,7 @@ class MvVideoSearch extends MvVideo
     public function rules()
     {
         return [
-            [['id', 'video_id', 'status'], 'integer'],
+            [['id', 'video_id', 'status', 'review'], 'integer'],
             [['key', 'title', 'desc', 'source_url', 'create_time', 'update_time'], 'safe'],
         ];
     }
@@ -87,18 +89,26 @@ class MvVideoSearch extends MvVideo
             'video',
             'keywords',
             'createTime',
+            'updateTime',
+            'review',
             'tags',
             'status',
             'key' => function($modal){
                 $video = VideoSearch::findOne($modal->video_id);
                 return $video->key;    
-            }
+            },
+            'commentNum',
+            'countNum',
         ];
         return $fields;
     }
     
     public function getCreateTime(){
     	return date('Y-m-d H:i:s', $this->create_time);
+    }
+    
+    public function getUpdateTime(){
+        return date('Y-m-d H:i:s', $this->update_time);
     }
     
     public function getTags(){
@@ -110,8 +120,12 @@ class MvVideoSearch extends MvVideo
         return $this->hasMany(MvVideoTagRel::className(), ['mv_video_id'=>'id']);
     }
     
-    public function getKey(){
-    	return 'ddd';
+    public function getCommentNum(){
+    	return $this->hasMany(MvCommentSearch::className(), ['mv_video_id'=>'id'])->count();
+    }
+    
+    public function getCountNum(){
+        return $this->hasOne(MvVideoCount::className(), ['video_id'=>'id']);
     }
 
 }

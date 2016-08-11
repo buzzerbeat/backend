@@ -66,6 +66,7 @@ return [
             'rules' => [
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'image-admin'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'mv-video-admin'],
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'mv-comment-admin'],
             ],
         ],
     ],

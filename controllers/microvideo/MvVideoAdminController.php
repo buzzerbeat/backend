@@ -131,15 +131,26 @@ class MvVideoAdminController extends BaseController
         $statusMap = MvVideo::STATUS_MAP;
         $imgUrl = Yii::getAlias('@imgUrl');
         $tag = \Yii::$app->request->get('tag', 0);
+        $vid = \Yii::$app->request->get('id', 0);
         $adminUrl = Yii::$app->params['adminUrl'];
-        return $this->render('list.tpl', ['statusMap'=>$statusMap, 'imgUrl'=>$imgUrl, 'tag'=>$tag, 'adminUrl'=>$adminUrl]);
+        
+        $data = [
+            'statusMap'=>$statusMap, 
+            'imgUrl'=>$imgUrl, 
+            'tag'=>$tag, 
+            'adminUrl'=>$adminUrl,
+            'vid'=>$vid,
+        ];
+        return $this->render('list.tpl', $data);
     }
     
     public function actionData(){
         $videoId = \Yii::$app->request->get('id', 0);
         $keyword = \Yii::$app->request->get('keyword', '');
+        $order = \Yii::$app->request->get('order', 'id');
         $desc = \Yii::$app->request->get('desc', 'desc');
         $tag = \Yii::$app->request->get('tag', 0);
+        $date = \Yii::$app->request->get('date', '');
         $query = MvVideoSearch::find();
         if(!empty($videoId)){
             $query->andWhere(['`mv_video`.id'=>$videoId]);
@@ -151,8 +162,18 @@ class MvVideoAdminController extends BaseController
         	$query->leftJoin('`mv_video_tag_rel`', '`mv_video_tag_rel`.mv_video_id = `mv_video`.id')
         	   ->andWhere(["`mv_video_tag_rel`.mv_tag_id"=>$tag]);
         }
+        if($order != 'id' && $order != 'create_time'){
+        	$query->leftJoin('`mv_video_count`', '`mv_video_count`.video_id = `mv_video`.id');
+        	$order = "`mv_video_count`.{$order}";
+        }
+        if(!empty($date)){
+        	$datearr = explode('~', $date);
+        	$start = strtotime($datearr[0]);
+        	$end = strtotime($datearr[1])+86400;
+        	$query->andWhere(['between', 'create_time', $start, $end]);
+        }
         return new ActiveDataProvider([
-            'query' => $query->orderBy("id {$desc}"),
+            'query' => $query->orderBy("{$order} {$desc}"),
             'pagination'=>[
                 'pageSize' => \Yii::$app->request->get('per-page', 20),
             ]
@@ -503,7 +524,7 @@ class MvVideoAdminController extends BaseController
     	
     	$model->setAttributes(Yii::$app->request->post());
     	if($model->save()){
-    	    $ret = ['status'=>0, 'message'=>''];
+    	    $ret = ['status'=>0, 'message'=>'成功'];
     	}
     	else{
     	    $ret = ['status'=>-1, 'message'=>array_shift($model->getErrors())];

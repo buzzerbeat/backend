@@ -44,6 +44,7 @@
                     ['label' => '视频管理', 'icon' => 'fa fa-video-camera', 'url' => '/microvideo/mv-video-admin/list'],
                     ['label' => 'Tag管理', 'icon' => 'fa fa-tag', 'url' => '/microvideo/mv-video-admin/tag'],
                     ['label' => '关键词', 'icon' => 'fa fa-key', 'url' => '/microvideo/mv-video-admin/keyword'],
+                    ['label' => '评论', 'icon' => 'fa fa-comment', 'url' => '/microvideo/mv-comment-admin/list'],
 
                     ['label' => 'Login', 'url' => ['site/login'], 'visible' => Yii::$app->user->isGuest],
                     ['label' => '工具', 'options' => ['class' => 'header']],
