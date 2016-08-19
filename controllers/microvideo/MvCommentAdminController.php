@@ -9,8 +9,6 @@ use backend\controllers\BaseController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\data\ActiveDataProvider;
-use microvideo\models\MvComment;
-use backend\models\microvideo\MvCommentSearch;
 use backend\models\MvVideoSearch;
 
 /**
@@ -131,20 +129,15 @@ class MvCommentAdminController extends BaseController
         $keyword = \Yii::$app->request->get('keyword', '');
         $keyword = trim($keyword);
         $desc = \Yii::$app->request->get('desc', 'desc');
-        $query = MvCommentSearch::find();
+        $query = CommentSearch::find();
         
-        $query->where(['status'=>MvCommentSearch::STATUS_ACTIVE]);
+        $query->where(['status'=>CommentSearch::STATUS_ACTIVE]);
         
         if(!empty($videoId)){
-            $query->andWhere(['mv_video_id'=>$videoId]);
+            $query->andWhere(['item_id'=>$videoId, 'item_type'=>'microvideo/video']);
         }
         if(!empty($keyword)){
-            $ids = [];
-            $comments = CommentSearch::find()->where(['like', 'content', "%{$keyword}%", false])->asArray()->all();
-            foreach($comments as $comt){
-            	$ids[] = $comt['id'];
-            }
-            $query->andWhere(['comment_id'=>$ids]);
+            $query->andWhere(['like', 'content', "%{$keyword}%", false]);
         }
 
         return new ActiveDataProvider([
@@ -159,9 +152,9 @@ class MvCommentAdminController extends BaseController
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
     	$id = \Yii::$app->request->post('id');
     	
-    	$model = MvCommentSearch::findOne($id);
+    	$model = CommentSearch::findOne($id);
     	
-    	$model->setAttributes(['status'=>MvCommentSearch::STATUS_INACTIVE]);
+    	$model->setAttributes(['status'=>CommentSearch::STATUS_INACTIVE]);
     	if(!$model->save()){
     		$ret = ['status'=>-1, 'message'=>array_shift($model->getErrors())];
     	}

@@ -24,10 +24,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'fail_num')->textInput() ?>
 
-    <?= $form->field($model, 'filter_num')->textInput() ?>
-
-    <?= $form->field($model, 'duplicate_num')->textInput() ?>
-
     <?= $form->field($model, 'error_json')->textarea(['rows' => 6]) ?>
 
     <div class="form-group">

@@ -9,7 +9,7 @@ use microvideo\models\MvVideo;
 use microvideo\models\MvVideoCount;
 use backend\models\microvideo\MvTag;
 use backend\models\microvideo\MvVideoTagRel;
-use backend\models\microvideo\MvCommentSearch;
+use backend\models\CommentSearch;
 
 /**
  * MvVideoSearch represents the model behind the search form about `microvideo\models\MvVideo`.
@@ -121,7 +121,9 @@ class MvVideoSearch extends MvVideo
     }
     
     public function getCommentNum(){
-    	return $this->hasMany(MvCommentSearch::className(), ['mv_video_id'=>'id'])->count();
+    	return $this->hasMany(CommentSearch::className(), ['item_id'=>'id'])
+    	   ->where(['item_type'=>'microvideo/video', 'status'=>CommentSearch::STATUS_ACTIVE])
+    	   ->count();
     }
     
     public function getCountNum(){

@@ -18,7 +18,7 @@ class CommentSearch extends Comment
     public function rules()
     {
         return [
-            [['id', 'status', 'user_id', 'parent', 'item_id', 'create_time'], 'integer'],
+            [['id', 'status', 'user_id', 'parent', 'item_id', 'create_time', 'dig'], 'integer'],
             [['content', 'client_id', 'user_ip', 'user_agent', 'item_type'], 'safe'],
         ];
     }
@@ -74,5 +74,13 @@ class CommentSearch extends Comment
             ->andFilterWhere(['like', 'item_type', $this->item_type]);
 
         return $dataProvider;
+    }
+    
+    public function fields(){
+    	$fields = parent::fields();
+    	$fields[] = 'id';
+    	$fields[] = 'item_id';
+    	
+    	return $fields;
     }
 }

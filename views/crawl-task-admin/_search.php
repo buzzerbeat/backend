@@ -29,10 +29,6 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'fail_num') ?>
 
-    <?php // echo $form->field($model, 'filter_num') ?>
-
-    <?php // echo $form->field($model, 'duplicate_num') ?>
-
     <?php // echo $form->field($model, 'error_json') ?>
 
     <div class="form-group">

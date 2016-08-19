@@ -35,8 +35,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'end_time:datetime',
             'success_num',
             'fail_num',
-            'filter_num',
-            'duplicate_num',
             'error_json:ntext',
         ],
     ]) ?>

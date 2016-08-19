@@ -70,16 +70,16 @@ function buildLine(v){
 	r += '</td>';
 	
 	r += '<td class="col-md-6">';
-	r += v.comment.content;
+	r += v.content;
 	r += '</td>';
 	
 	r += '<td class="col-md-3">';
-	r += '<img src="{{$imgUrl}}/thumb/60/60/0/'+v.comment.userAvatar.sid+'/'+v.comment.userAvatar.md5+v.comment.userAvatar.dotExt+'"/>&nbsp;&nbsp;'+v.comment.userName+'&nbsp;&nbsp;发布于'+v.comment.elapsedTime;
+	r += '<img src="{{$imgUrl}}/thumb/60/60/0/'+v.userAvatar.sid+'/'+v.userAvatar.md5+v.userAvatar.dotExt+'"/>&nbsp;&nbsp;'+v.userName+'&nbsp;&nbsp;发布于'+v.elapsedTime;
 	r += '</td>';
 	
 	r += '<td>';
 	r += '<button class="btn btn-danger del" cid="'+v.id+'">删除</button>';
-	r += '<a class="btn btn-link" href="../mv-video-admin/list?id='+v.vid+'" target="_blank">所属视频</a>';
+	r += '<a class="btn btn-link" href="../mv-video-admin/list?id='+v.item_id+'" target="_blank">所属视频</a>';
 	r += '</td>';
 	
 	r += '</tr>';
