@@ -433,6 +433,7 @@ class MvVideoAdminController extends BaseController
     	$keyword = trim($keyword);
     	$sql = "select t.* from mv_tag as t left join mv_video_tag_rel as r on t.id = r.mv_tag_id ";
     	$sql .= " where t.name like '%{$keyword}%' and (r.mv_video_id is null or r.mv_video_id != {$videoId})";
+        $sql = "select t.* from mv_tag as t  where t.name like '%{$keyword}%' and t.id not in (select mv_tag_id from mv_video_tag_rel where mv_video_id = {$videoId})";
     	$tag = MvTag::findBySql($sql);
     	
     	return new ActiveDataProvider([
