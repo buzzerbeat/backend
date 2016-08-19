@@ -36,6 +36,10 @@
                     ['label' => '视频管理', 'icon' => 'fa fa-video-camera', 'url' => '/video-admin'],
                     ['label' => '任务管理', 'icon' => 'fa fa-tasks', 'url' => '/crawl-task-admin'],
 
+
+                    ['label' => '新闻', 'options' => ['class' => 'header']],
+                    ['label' => '新闻管理', 'icon' => 'fa fa-newspaper-o', 'url' => '/article/admin-article'],
+
                     ['label' => '壁纸', 'options' => ['class' => 'header']],
                     ['label' => '分类管理', 'icon' => 'fa fa-list', 'url' => '/wallpaper/album-admin'],
                     ['label' => '图片管理', 'icon' => 'fa fa-picture-o', 'url' => '/wallpaper/image-admin'],
@@ -45,6 +49,9 @@
                     ['label' => 'Tag管理', 'icon' => 'fa fa-tag', 'url' => '/microvideo/mv-video-admin/tag'],
                     ['label' => '关键词', 'icon' => 'fa fa-key', 'url' => '/microvideo/mv-video-admin/keyword'],
                     ['label' => '评论', 'icon' => 'fa fa-comment', 'url' => '/microvideo/mv-comment-admin/list'],
+
+                    ['label' => '任务分发', 'options' => ['class' => 'header']],
+                    ['label' => '任务管理', 'icon' => 'fa fa-tasks', 'url' => '/taskdist/task-admin/'],
 
                     ['label' => 'Login', 'url' => ['site/login'], 'visible' => Yii::$app->user->isGuest],
                     ['label' => '工具', 'options' => ['class' => 'header']],

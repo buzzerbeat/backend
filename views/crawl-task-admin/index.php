@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-//            'id',
+            'id',
             'command',
             [
                 'label' => '状态',
@@ -38,8 +38,38 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'start_time:datetime',
             'end_time:datetime',
-            'success_num',
-            'fail_num',
+//            'success_num',
+//            'fail_num',
+            [
+                'label' => 'Success Entity',
+                'format' => 'html',
+                'value' => function ($data) {
+                    return $data->successEntityNum;
+                }
+            ],
+
+            [
+                'label' => 'Fail Entity',
+                'format' => 'html',
+                'value' => function ($data) {
+                    return $data->failEntityNum;
+                }
+            ],
+            [
+                'label' => 'Duplicate Entity',
+                'format' => 'html',
+                'value' => function ($data) {
+                    return $data->duplicateEntityNum;
+                }
+            ],
+
+            [
+                'label' => 'Filter Entity',
+                'format' => 'html',
+                'value' => function ($data) {
+                    return $data->filterEntityNum;
+                }
+            ],
             // 'filter_num',
             // 'duplicate_num',
             [

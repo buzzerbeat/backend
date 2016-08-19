@@ -18,7 +18,7 @@ class CrawlTaskSearch extends CrawlTask
     public function rules()
     {
         return [
-            [['id', 'status', 'start_time', 'end_time', 'success_num', 'fail_num', 'filter_num', 'duplicate_num'], 'integer'],
+            [['id', 'status', 'start_time', 'end_time', 'success_num', 'fail_num'], 'integer'],
             [['command', 'error_json'], 'safe'],
         ];
     }
@@ -65,12 +65,11 @@ class CrawlTaskSearch extends CrawlTask
             'end_time' => $this->end_time,
             'success_num' => $this->success_num,
             'fail_num' => $this->fail_num,
-            'filter_num' => $this->filter_num,
-            'duplicate_num' => $this->duplicate_num,
         ]);
 
         $query->andFilterWhere(['like', 'command', $this->command])
             ->andFilterWhere(['like', 'error_json', $this->error_json]);
+
 
         return $dataProvider;
     }
