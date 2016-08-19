@@ -93,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'value' =>function($data) {
                     //CrawlThreadSearch%5Bid%5D=&CrawlThreadSearch%5Bkey%5D=&CrawlThreadSearch%5Btask_id%5D=3&CrawlThreadSearch%5Bstatus%5D=&CrawlThreadSearch%5Btime%5D=
-                    return  Html::a("查看", "/crawl-thread-admin?" . urlencode("CrawlThreadSearch[task_id]") . '=' . $data->id);
+                    return  Html::a("查看", "/crawl-thread-admin?" . urlencode("CrawlThreadSearch[task_id]") . '=' . $data->id . '&sort=-id');
 
                 },
 

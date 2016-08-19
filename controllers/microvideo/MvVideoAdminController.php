@@ -149,8 +149,10 @@ class MvVideoAdminController extends BaseController
         $keyword = \Yii::$app->request->get('keyword', '');
         $order = \Yii::$app->request->get('order', 'id');
         $desc = \Yii::$app->request->get('desc', 'desc');
-        $tag = \Yii::$app->request->get('tag', 0);
+        $tagid = \Yii::$app->request->get('tag', 0);
         $date = \Yii::$app->request->get('date', '');
+        $tagname = \Yii::$app->request->get('tagname', '');
+        
         $query = MvVideoSearch::find();
         if(!empty($videoId)){
             $query->andWhere(['`mv_video`.id'=>$videoId]);
@@ -158,11 +160,16 @@ class MvVideoAdminController extends BaseController
         if(!empty($keyword)){
             $query->andWhere(['like', '`mv_video`.title', "%{$keyword}%", false]);
         }
-        if(!empty($tag)){
+        if(!empty($tagid) || !empty($tagname)){
+            $tagname = trim($tagname);
+            if(empty($tagid) && !empty($tagname)){
+            	$tag = MvTag::findOne(['name'=>$tagname]);
+            	$tagid = !empty($tag) ? $tag->id : 0;
+            }
         	$query->leftJoin('`mv_video_tag_rel`', '`mv_video_tag_rel`.mv_video_id = `mv_video`.id')
-        	   ->andWhere(["`mv_video_tag_rel`.mv_tag_id"=>$tag]);
+        	   ->andWhere(["`mv_video_tag_rel`.mv_tag_id"=>$tagid]);
         }
-        if($order != 'id' && $order != 'create_time'){
+        if($order != 'id' && $order != 'create_time' && $order != 'rank'){
         	$query->leftJoin('`mv_video_count`', '`mv_video_count`.video_id = `mv_video`.id');
         	$order = "`mv_video_count`.{$order}";
         }

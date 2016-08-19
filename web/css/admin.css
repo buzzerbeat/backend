@@ -19,6 +19,7 @@
     border: 1px solid #ccc;
     background: #fff;
     z-index: 100;
+	overflow:hidden;
 }
 .category .inputRel{
 	left:14px;

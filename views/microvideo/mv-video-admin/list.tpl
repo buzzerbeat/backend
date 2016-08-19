@@ -4,20 +4,26 @@
 		<div class="col-md-12">
 			<div class="form-inline margin-bottom-10">
 				<input type="text" id="selectedDate" class="form-control auto-kal" data-kal="months: 2, mode:'range', format:'YYYY-MM-DD', rangeDelimiter:'~', direction:'today-past'" placeholder="指定日期筛选"/>
+				<input class="form-control" type="number" id="videoid" placeholder="视频id查询" {{if !empty($vid)}}value="{{$vid}}"{{/if}}/>
+				<input class="form-control" type="text" id="keyword" placeholder="名称查询"/>
+				<span class="buildDiv form-inline">
+					<input class="form-control" type="text" id="addRelInput0" placeholder="标签查询" oninput="buildBox(0, this.value);" rid="0"/>
+				</span>
+				<button class="btn btn-primary" id="filterBtn">搜索</button>
+				<button class="btn btn-default" id="resetBtn">重置</button>
+			</div>
+			<div class="form-inline margin-bottom-10">
 				<div class="btn-group" id="order">
 					<button class="btn btn-info active" order="id">按id</button>
 					<button class="btn btn-default" order="create_time">按源发布时间</button>
 					<button class="btn btn-default" order="played">按播放次数</button>
 					<button class="btn btn-default" order="like">按点赞数</button>
+					<button class="btn btn-default" order="rank">按rank</button>
 				</div>
 				<div class="btn-group" id="desc">
 					<button class="btn btn-info active" desc="desc">倒序</button>
 					<button class="btn btn-default" desc="asc">正序</button>
 				</div>
-				<input class="form-control" type="number" id="videoid" placeholder="视频id查询" {{if !empty($vid)}}value="{{$vid}}"{{/if}}/>
-				<input class="form-control" type="text" id="keyword" placeholder="名称查询"/>
-				<button class="btn btn-primary" id="filterBtn">搜索</button>
-				<button class="btn btn-default" id="resetBtn">重置</button>
 			</div>
 		</div>
 	</div>
@@ -33,7 +39,7 @@
 	</div>
 </div>
 <script type="text/javascript">
-var url = 'data', pagesize = 20, statusMap = [], videoid={{$vid}}, keyword='', desc = 'desc', tag={{$tag}}, order = 'id', date = '';
+var url = 'data', pagesize = 20, statusMap = [], videoid={{$vid}}, keyword='', desc = 'desc', tag={{$tag}}, order = 'id', date = '', tagname = '';
 {{foreach from=$statusMap key=sk item=sv}}
 	statusMap[{{$sk}}] = '{{$sv}}';
 {{/foreach}}
@@ -54,7 +60,7 @@ function getOptions() {
 function pageselectCallback(page_index, jq){
     $("#table").html('<div class="alert alert-info" role="alert">加载中...</div>');
     var curPage = 1+parseInt(page_index); 
-    $.getJSON(url+'?id='+videoid+'&keyword='+keyword+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage+'&tag='+tag+'&order='+order+'&date='+date, function(data){
+    $.getJSON(url+'?id='+videoid+'&keyword='+keyword+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage+'&tag='+tag+'&order='+order+'&date='+date+'&tagname='+tagname, function(data){
         var lines = '';
         if(page_index == 0){
             var optInit = getOptions();
@@ -129,7 +135,9 @@ function buildLine(v){
 	}
 	r += '<p>源发布时间：'+v.createTime+'</p>';
 	r += '<p>采集时间：'+v.updateTime+'</p>';
-	r += '<p>赞（'+v.countNum.like+'）&nbsp;踩（'+v.countNum.bury+'）&nbsp;播放次数（'+v.countNum.played+'）</p>';
+	if(v.countNum != null){
+		r += '<p>赞（'+v.countNum.like+'）&nbsp;踩（'+v.countNum.bury+'）&nbsp;播放次数（'+v.countNum.played+'）</p>';
+	}
 	r += '<p>keywords</p>';
 	r += '<div class="clearfix ">';
 	for(var i in v.keywords){
@@ -331,6 +339,8 @@ $(function(){
     $('#filterBtn').click(function(){
     	videoid = $('#videoid').val();
     	keyword = $('#keyword').val();
+    	tag = $('#addRelInput0').attr('rid');
+    	tagname = $('#addRelInput0').val();
     	pageselectCallback(0, null);
     });
     
@@ -338,9 +348,12 @@ $(function(){
     	$('#videoid').val('');
     	$('#keyword').val('');
     	$('#selectedDate').val('');
+    	$('#addRelInput0').val('').attr('rid', 0);
     	videoid = 0;
     	keyword = '';
     	date = '';
+    	tag = 0;
+    	tagname = '';
     	pageselectCallback(0, null);
     });
     

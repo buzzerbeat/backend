@@ -34,7 +34,7 @@
                     ['label' => '用户管理', 'icon' => 'fa fa-user', 'url' => '/admin-user'],
                     ['label' => '图片管理', 'icon' => 'fa fa-picture-o', 'url' => '/image-admin/list'],
                     ['label' => '视频管理', 'icon' => 'fa fa-video-camera', 'url' => '/video-admin'],
-                    ['label' => '任务管理', 'icon' => 'fa fa-tasks', 'url' => '/crawl-task-admin'],
+                    ['label' => '任务管理', 'icon' => 'fa fa-tasks', 'url' => '/crawl-task-admin/index?sort=-id'],
 
 
                     ['label' => '新闻', 'options' => ['class' => 'header']],
