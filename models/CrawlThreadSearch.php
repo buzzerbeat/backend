@@ -18,7 +18,7 @@ class CrawlThreadSearch extends CrawlThread
     public function rules()
     {
         return [
-            [['id', 'task_id', 'status', 'time', 'duration'], 'integer'],
+            [['id', 'task_id', 'status', 'time', 'duration', 'total_num', 'success_num', 'fail_num', 'duplicate_num', 'filter_num'], 'integer'],
             [['site', 'url', 'key', 'entity_id', 'error_json'], 'safe'],
         ];
     }

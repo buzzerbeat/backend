@@ -37,6 +37,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 //            'site',
             'time:datetime',
+            'total_num',
+            'success_num',
+            'fail_num',
+            'filter_num',
+            'duplicate_num',
 
 
 
