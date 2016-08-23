@@ -46,3 +46,6 @@
 .img-item {margin-right:10px;margin-bottom:10px;}
 .img-backend{background:#fff;padding:10px;}
 .default-cover{height:192px;}
+
+.editable{display:inline-block;}
+.editable input{width:100%;}

@@ -21,7 +21,8 @@ class AppAsset extends AssetBundle
         'js/ajaxfileupload.js',
         'js/admin.js',
         'js/mousewheel.js',
-        'js/kalendae.min.js'
+        'js/kalendae.min.js',
+        'js/jquery.editable-1.3.3.js'
     ];
     public $depends = [
         'yii\web\YiiAsset',
