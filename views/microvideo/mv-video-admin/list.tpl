@@ -72,6 +72,11 @@ function pageselectCallback(page_index, jq){
         });
         var th = buildTh();
         $("#table").html(buildTable(th, lines));
+        
+        $('.vname').editable({
+			onSubmit:updateVname,
+			editClass:'focus',
+		});
     });
 }
 
@@ -90,16 +95,18 @@ function buildLine(v){
 	var r = '<tr id="videoItem'+v.id+'">', 
 		height = v.video.coverImg != null ? Math.round(v.video.coverImg.height/v.video.coverImg.width*320) : (v.video.width != 0 ? Math.round(v.video.height/v.video.width*320) : 0);
 	r += '<td>';
-	r += '<h4 class="inline">'+v.id+'（'+v.sid+'）'+v.title;
+	r += '<h4 class="inline">'+v.id+'（'+v.sid+'）<p class="vname editable" vid="'+v.id+'">'+v.title+'</p>';
 	
 	r += '&nbsp;&nbsp;<select class="form-control status" vid="'+v.id+'">';
 	for(var i in statusMap){
 		r += '<option value="'+i+'" '+(i == v.status ? 'selected="selected"' : '')+'>'+statusMap[i]+'</option>';
 	}
 	r += '</select>';
+	r += '&nbsp;&nbsp;<select class="form-control review" vid="'+v.id+'">';
 	for(var i=0; i<3; i++){
-		r += '&nbsp;&nbsp;<label><input type="radio" class="review" vid="'+v.id+'" name="albumReview'+v.id+'" review="'+i+'" '+(v.review == i ? 'checked=""' : '')+'> review-'+i+'</label>';
+		r += '<option value="'+i+'" '+(v.review == i ? 'selected="selected"' : '')+'> review-'+i+'</option>';
 	}
+	r += '</select>';
 	
 	r += '</h4>';
 	
@@ -318,6 +325,24 @@ function uploadVideoCover(videoId, img){
 	
 }
 
+function updateVname(content){
+	var $this = $(this), id = $this.attr('vid'), 
+    	txtValue = content.current;
+	
+	if(content.current != content.previous){
+		$.post(
+			'video-update',
+			{id:id, title:txtValue},
+			function(data){
+				if(data.status != 0){
+					alert(data.message);
+				}
+			},
+			'json'
+		);
+	}
+}
+
 $(function(){
 
 	pageselectCallback(0, null);
@@ -468,8 +493,8 @@ $(function(){
 		}
 	});
 	
-	$(document).on('click', '.review', function(){
-		var curVid = $(this).attr('vid'), review = $(this).attr('review');
+	$(document).on('change', '.review', function(){
+		var curVid = $(this).attr('vid'), review = $(this).val();
 		$.post(
 			'video-update',
 			{id:curVid, review:review},
