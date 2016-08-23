@@ -50,7 +50,7 @@ function getOptions() {
 function pageselectCallback(page_index, jq){
     $("#table").html('<div class="alert alert-info" role="alert">加载中...</div>');
     var curPage = 1+parseInt(page_index); 
-    $.getJSON(url+'?wpid='+wpImgid+'&wpsid='+wpImgsid+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage+'&keyword='+album+'&imgid='+imgid+'&imgsid='+imgsid, function(data){
+    $.getJSON(url+'?wpid='+wpImgid+'&wpsid='+wpImgsid+'&per-page='+pagesize+'&desc='+desc+'&page='+curPage+'&keyword='+album+'&imgid='+imgid+'&imgsid='+imgsid, function(data){
         var lines = '';
         if(page_index == 0){
             var optInit = getOptions();

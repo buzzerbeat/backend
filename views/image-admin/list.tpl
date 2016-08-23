@@ -53,7 +53,7 @@ function getOptions() {
 function pageselectCallback(page_index, jq){
     $("#table").html('<div class="alert alert-info" role="alert">加载中...</div>');
     var curPage = 1+parseInt(page_index); 
-    $.getJSON(url+'?id='+imgid+'&sid='+imgsid+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage, function(data){
+    $.getJSON(url+'?id='+imgid+'&sid='+imgsid+'&per-page='+pagesize+'&desc='+desc+'&page='+curPage, function(data){
         var lines = '';
         if(page_index == 0){
             var optInit = getOptions();

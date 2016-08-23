@@ -141,6 +141,9 @@ class AlbumAdminController extends BaseController
         
         return new ActiveDataProvider([
             'query' => $query->orderBy("create_time {$desc}"),
+            'pagination' => [
+                'pageSize' => \Yii::$app->request->get('per-page', 20),
+            ],
         ]);
     }
     

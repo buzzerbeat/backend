@@ -205,6 +205,9 @@ class MvVideoAdminController extends BaseController
         
         return new ActiveDataProvider([
             'query' => $query->orderBy("rank {$desc}, id {$desc}"),
+            'pagination' => [
+                'pageSize' => \Yii::$app->request->get('per-page', 20),
+            ],
         ]);
     }
     
@@ -303,6 +306,9 @@ class MvVideoAdminController extends BaseController
         
         $active = new ActiveDataProvider([
             'query' => $query->orderBy("count {$desc}"),
+            'pagination' => [
+                'pageSize' => \Yii::$app->request->get('per-page', 20),
+            ],
         ]);
         
         return $active;

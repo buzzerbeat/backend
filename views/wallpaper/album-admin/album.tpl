@@ -61,7 +61,7 @@ function getOptions() {
 function pageselectCallback(page_index, jq){
     $("#table").html('<div class="alert alert-info" role="alert">加载中...</div>');
     var curPage = 1+parseInt(page_index); 
-    $.getJSON(url+'?id='+albumid+'&sid='+albumsid+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage+'&keyword='+keyword+'&category='+category, function(data){
+    $.getJSON(url+'?id='+albumid+'&sid='+albumsid+'&per-page='+pagesize+'&desc='+desc+'&page='+curPage+'&keyword='+keyword+'&category='+category, function(data){
         var lines = '';
         if(page_index == 0){
             var optInit = getOptions();

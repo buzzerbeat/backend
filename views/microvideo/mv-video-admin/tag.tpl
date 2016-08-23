@@ -50,7 +50,7 @@
 	</div>
 </div>
 <script type="text/javascript">
-var url = 'tag-data', pagesize = 10, keyword='', desc = 'desc';
+var url = 'tag-data', pagesize = 20, keyword='', desc = 'desc';
 
 function getOptions() {
     var opt = {
@@ -69,7 +69,7 @@ function getOptions() {
 function pageselectCallback(page_index, jq){
     $("#table").html('<div class="alert alert-info" role="alert">加载中...</div>');
     var curPage = 1+parseInt(page_index); 
-    $.getJSON(url+'?keyword='+keyword+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage, function(data){
+    $.getJSON(url+'?keyword='+keyword+'&per-page='+pagesize+'&desc='+desc+'&page='+curPage, function(data){
         var lines = '';
         if(page_index == 0){
             var optInit = getOptions();
