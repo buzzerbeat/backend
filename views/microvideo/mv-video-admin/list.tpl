@@ -60,7 +60,7 @@ function getOptions() {
 function pageselectCallback(page_index, jq){
     $("#table").html('<div class="alert alert-info" role="alert">加载中...</div>');
     var curPage = 1+parseInt(page_index); 
-    $.getJSON(url+'?id='+videoid+'&keyword='+keyword+'&pre-page='+pagesize+'&desc='+desc+'&page='+curPage+'&tag='+tag+'&order='+order+'&date='+date+'&tagname='+tagname, function(data){
+    $.getJSON(url+'?id='+videoid+'&keyword='+keyword+'&per-page='+pagesize+'&desc='+desc+'&page='+curPage+'&tag='+tag+'&order='+order+'&date='+date+'&tagname='+tagname, function(data){
         var lines = '';
         if(page_index == 0){
             var optInit = getOptions();

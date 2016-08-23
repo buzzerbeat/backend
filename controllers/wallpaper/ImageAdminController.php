@@ -157,7 +157,7 @@ class ImageAdminController extends BaseController
         return new ActiveDataProvider([
             'query'=>$query->orderBy("id {$desc}"),
             'pagination'=>[
-                'pageSize'=>\Yii::$app->request->get('pre-page', 20)
+                'pageSize'=>\Yii::$app->request->get('per-page', 20)
             ]
         ]);
     }
