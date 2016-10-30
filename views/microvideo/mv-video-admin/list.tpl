@@ -39,7 +39,7 @@
 	</div>
 </div>
 <script type="text/javascript">
-var url = 'data', pagesize = 20, statusMap = [], videoid={{$vid}}, keyword='', desc = 'desc', tag={{$tag}}, order = 'id', date = '', tagname = '';
+var url = 'data', pagesize = 50, statusMap = [], videoid={{$vid}}, keyword='', desc = 'desc', tag={{$tag}}, order = 'id', date = '', tagname = '';
 {{foreach from=$statusMap key=sk item=sv}}
 	statusMap[{{$sk}}] = '{{$sv}}';
 {{/foreach}}
